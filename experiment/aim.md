@@ -1,1 +1,1 @@
-### Aim of the experiment
+To study the working principles, characteristics, and performance parameters of optoelectronic devices, including photodiodes, light-emitting diodes (LEDs), and solar cells, by analyzing their I–V characteristics, quantum efficiency, and energy conversion properties.

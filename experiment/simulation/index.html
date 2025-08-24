@@ -1,13 +1,4330 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<!-- Add CSS at the head of HTML file -->
-    <link rel="stylesheet" href="./css/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optoelectronics Virtual Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-size: 14px;
+        }
+
+        /* Modern light theme header - more compact */
+        .header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(99, 102, 241, 0.1) 25%, 
+                rgba(139, 92, 246, 0.1) 50%, 
+                rgba(236, 72, 153, 0.1) 75%, 
+                transparent 100%);
+            animation: shimmerHeader 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmerHeader {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Reduced padding and gaps for more compact layout */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Modern tab design - more compact */
+        .experiment-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+            padding: 0.3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: none;
+            background: transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .tab:hover::before {
+            left: 100%;
+        }
+
+        .tab:hover {
+            color: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .tab i {
+            font-size: 1.25rem;
+        }
+
+        /* Enhanced main content layout - more compact */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .simulation-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simulation-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+        }
+
+        /* Enhanced simulation area with more compact canvases */
+        .simulation-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .device-view {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .device-view:hover {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .device-view h3 {
+            color: #1f2937;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* High-resolution canvas styling - more compact */
+        .canvas-container {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            width: 100%;
+            height: 280px;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Enhanced control panel - more compact */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .control-group:hover {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modern slider design - more compact */
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="range"]::-webkit-slider-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .slider-value {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Enhanced status grid - more compact */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            color: rgba(0, 0, 0, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Enhanced chart area - more compact */
+        .chart-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 0.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        /* Enhanced buttons - more compact */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1f2937;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Quiz styling - more compact */
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .experiment-content {
+            display: none;
+        }
+
+        .experiment-content.active {
+            display: block;
+        }
+
+        /* Particle animations for enhanced visual appeal */
+        .canvas-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .canvas-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .photon-particle {
+            background: radial-gradient(circle, #fbbf24 0%, #f59e0b 70%, #d97706 100%);
+            box-shadow: 0 0 20px #fbbf24, 0 0 40px rgba(251, 191, 36, 0.5);
+            animation: photonFloat 3s ease-in-out infinite;
+        }
+
+        .electron-particle {
+            background: radial-gradient(circle, #3b82f6 0%, #1e40af 70%, #1e3a8a 100%);
+            box-shadow: 0 0 15px #3b82f6, 0 0 30px rgba(59, 130, 246, 0.5);
+            animation: electronFloat 2s ease-in-out infinite alternate;
+        }
+
+        .hole-particle {
+            background: radial-gradient(circle, #ef4444 0%, #dc2626 70%, #b91c1c 100%);
+            box-shadow: 0 0 15px #ef4444, 0 0 30px rgba(239, 68, 68, 0.5);
+            animation: holeFloat 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes photonFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(300px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(320px) scale(0.5);
+            }
+        }
+
+        @keyframes electronFloat {
+            0% { transform: translateX(0) scale(1); }
+            100% { transform: translateX(30px) scale(1.1); }
+        }
+
+        @keyframes holeFloat {
+            0% { transform: translateX(0) scale(1); }
+            100% { transform: translateX(-30px) scale(1.1); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .control-panel {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .simulation-area {
+                grid-template-columns: 1fr;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading and transition effects */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CHALLENGE STYLES */
+        .challenge-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .challenge-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-section:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .challenge-section.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .challenge-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .challenge-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .challenge-description {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .quiz-question {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .quiz-question h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .quiz-option:hover {
+            border-color: #6366f1;
+            background: #f8fafc;
+        }
+
+        .quiz-option.selected {
+            border-color: #6366f1;
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .quiz-option.correct {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .fill-blank-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .fill-blank-text {
+            font-size: 1rem;
+            line-height: 2;
+            color: #1f2937;
+        }
+
+        .fill-blank-input {
+            display: inline-block;
+            width: 120px;
+            padding: 4px 8px;
+            border: 2px solid #6366f1;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 600;
+            margin: 0 5px;
+            background: white;
+        }
+
+        .fill-blank-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .fill-blank-input.correct {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        .fill-blank-input.incorrect {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 50px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .matching-column {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .matching-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            text-align: center;
+        }
+        
+        .matching-item:hover {
+            border-color: #6366f1;
+            transform: translateX(5px);
+        }
+        
+        .matching-item.selected {
+            border-color: #6366f1;
+            background: #eff6ff;
+            transform: scale(1.02);
+        }
+        
+        .matching-item.matched {
+            border-color: #6366f1;
+            background: #eff6ff;
+            opacity: 0.9;
+        }
+        
+        .matching-item.correct-match {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .matching-item.incorrect-match {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .matching-connections {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connection-line {
+            position: absolute;
+            background: #6366f1;
+            height: 3px;
+            border-radius: 2px;
+            opacity: 0.8;
+            z-index: 1;
+            transform-origin: left;
+        }
+        
+        .challenge-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .challenge-progress {
+            background: #f3f4f6;
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .challenge-progress-bar {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .challenge-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .challenge-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .challenge-btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .challenge-btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .challenge-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .challenge-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .challenge-feedback {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .challenge-feedback.success {
+            background: #f0fdf4;
+            color: #065f46;
+            border: 1px solid #10b981;
+            display: block;
+        }
+
+        .challenge-feedback.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+            display: block;
+        }
+
+        .challenge-hint {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #92400e;
+            display: none;
+        }
+
+        .challenge-hint.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .challenge-hint-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .explanation-panel {
+            background: #f0f9ff;
+            border: 1px solid #0284c7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .explanation-panel.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Guided Tour Styles */
+        .floating-button {
+            position: fixed;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .floating-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+        }
+
+        .floating-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .floating-button.tour {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            bottom: 2rem;
+            right: 2rem;
+        }
+
+        .floating-button.help {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            bottom: 6.5rem;
+            right: 2rem;
+        }
+
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 998;
+            display: none;
+            pointer-events: none;
+        }
+
+        .tour-overlay.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tour-spotlight {
+            position: absolute;
+            background: transparent;
+            border: 3px solid #3b82f6;
+            border-radius: 8px;
+            transition: all 0.5s ease;
+            z-index: 999;
+            pointer-events: none;
+            box-shadow: none;
+            animation: spotlight-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes spotlight-pulse {
+            0%, 100% { border-color: rgba(59, 130, 246, 0.7); }
+            50% { border-color: rgba(59, 130, 246, 1); }
+        }
+
+        .tour-spotlight-secondary {
+            position: absolute;
+            background: transparent;
+            border: 2px solid #8b5cf6;
+            border-radius: 8px;
+            transition: all 0.5s ease;
+            z-index: 999;
+            pointer-events: none;
+            box-shadow: none;
+            animation: secondary-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes secondary-pulse {
+            0%, 100% { border-color: rgba(139, 92, 246, 0.7); }
+            50% { border-color: rgba(139, 92, 246, 1); }
+        }
+
+        .tour-popup {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 100000;
+            min-width: 300px;
+            max-width: 450px;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .tour-popup.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .tour-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tour-step-number {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .tour-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .tour-content {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .tour-challenge {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .tour-challenge-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tour-challenge-title i {
+            margin-right: 8px;
+        }
+
+        .tour-challenge-content {
+            color: #78350f;
+            font-size: 0.9rem;
+        }
+
+        .tour-progress {
+            background: #f3f4f6;
+            height: 6px;
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .tour-progress-bar {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .tour-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .tour-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tour-btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .tour-btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .tour-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .tour-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .floating-panel {
+            position: fixed;
+            max-width: 18rem;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 99;
+            bottom: 7rem;
+            right: 2rem;
+            transform-origin: bottom right;
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1.5rem;
+        }
+
+        .floating-panel.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .floating-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .floating-panel-close {
+            cursor: pointer;
+            color: #6b7280;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .floating-panel-content {
+            max-height: calc(80vh - 3rem);
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-		<!-- Your code goes here-->
 
-	<!-- Add JS at the bottom of HTML file --> 
-        <script src="./js/main.js"></script>
+
+    <div class="container">
+        <!-- Experiment tabs -->
+        <div class="experiment-tabs">
+            <button class="tab active" onclick="switchExperimentTab(this, 'photodiode')">
+                <i class="fas fa-eye"></i> Photodiode
+            </button>
+            <button class="tab" onclick="switchExperimentTab(this, 'led')">
+                <i class="fas fa-lightbulb"></i> LED
+            </button>
+            <button class="tab" onclick="switchExperimentTab(this, 'solar')">
+                <i class="fas fa-solar-panel"></i> Solar Cell
+            </button>
+            <button class="tab" onclick="switchExperimentTab(this, 'challenges')">
+                <i class="fas fa-tasks"></i> Challenges
+            </button>
+        </div>
+
+        <!-- Photodiode Experiment -->
+        <div id="photodiode" class="experiment-content active fade-in">
+            <div class="main-content">
+                <div class="simulation-panel">
+                    <div class="simulation-area">
+                        <div class="device-view">
+                            <h3><i class="fas fa-microchip"></i> Device Structure</h3>
+                            <div class="canvas-container">
+                                <canvas id="structureCanvas" width="800" height="600"></canvas>
+                                <div class="canvas-particles" id="structureParticles"></div>
+                            </div>
+                        </div>
+                        <div class="device-view">
+                            <h3><i class="fas fa-chart-line"></i> Band Diagram</h3>
+                            <div class="canvas-container">
+                                <canvas id="bandCanvas" width="800" height="600"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-panel">
+                        <h3 class="chart-title">I-V Characteristics & Real-time Analysis</h3>
+                        <div id="ivPlot" style="width: 100%; height: 500px;"></div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label class="control-label">Bias Voltage (V)</label>
+                        <input type="range" id="biasVoltage" min="-1" max="1" value="0" step="0.05">
+                        <span class="slider-value" id="biasValue">0.0 V</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Light Intensity (mW/cm²)</label>
+                        <input type="range" id="lightIntensity" min="0" max="100" value="50" step="1">
+                        <span class="slider-value" id="lightValue">50 mW/cm²</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Temperature (K)</label>
+                        <input type="range" id="temperature" min="250" max="400" value="300" step="5">
+                        <span class="slider-value" id="tempValue">300 K</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Doping Concentration</label>
+                        <input type="range" id="doping" min="1" max="10" value="5" step="0.5">
+                        <span class="slider-value" id="dopingValue">5×10¹⁶ cm⁻³</span>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <span class="status-value" id="currentValue">0.0</span>
+                            <span class="status-label">Current (mA)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="powerValue">0.0</span>
+                            <span class="status-label">Power (mW)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="voltageValue">0.0</span>
+                            <span class="status-label">Voltage (V)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="temperatureValue">300</span>
+                            <span class="status-label">Temperature (K)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="resetSimulation()" style="flex: 1;">
+                            <i class="fas fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn btn-secondary" onclick="captureData()" style="flex: 1;">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LED Experiment -->
+        <div id="led" class="experiment-content">
+            <div class="main-content">
+                <div class="simulation-panel">
+                    <div class="simulation-area">
+                        <div class="device-view">
+                            <h3><i class="fas fa-microchip"></i> Device Structure</h3>
+                            <div class="canvas-container">
+                                <canvas id="ledStructureCanvas" width="800" height="600"></canvas>
+                                <div class="canvas-particles" id="ledStructureParticles"></div>
+                            </div>
+                        </div>
+                        <div class="device-view">
+                            <h3><i class="fas fa-chart-line"></i> Band Diagram</h3>
+                            <div class="canvas-container">
+                                <canvas id="ledBandCanvas" width="800" height="600"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-panel">
+                        <h3 class="chart-title">I-V Characteristics & Emission Spectrum</h3>
+                        <div id="ledIvPlot" style="width: 100%; height: 500px;"></div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label class="control-label">Forward Voltage (V)</label>
+                        <input type="range" id="ledVoltage" min="0" max="1.5" value="1.0" step="0.01">
+                        <span class="slider-value" id="ledVoltageValue">1.0 V</span>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <span class="status-value" id="ledPowerValue">40</span>
+                            <span class="status-label">Optical Power (mW)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="ledEfficiencyValue">21</span>
+                            <span class="status-label">Efficiency (%)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="ledWavelengthValue">610</span>
+                            <span class="status-label">Wavelength (nm)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="ledBrightnessValue">67</span>
+                            <span class="status-label">Brightness (%)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="resetSimulation()" style="flex: 1;">
+                            <i class="fas fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn btn-secondary" onclick="captureData()" style="flex: 1;">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solar Cell Experiment -->
+        <div id="solar" class="experiment-content">
+            <div class="main-content">
+                <div class="simulation-panel">
+                    <div class="simulation-area">
+                        <div class="device-view">
+                            <h3><i class="fas fa-microchip"></i> Device Structure</h3>
+                            <div class="canvas-container">
+                                <canvas id="solarStructureCanvas" width="800" height="400"></canvas>
+                                <div class="canvas-particles" id="solarStructureParticles"></div>
+                            </div>
+                        </div>
+                        <div class="device-view">
+                            <h3><i class="fas fa-chart-line"></i> Band Diagram</h3>
+                            <div class="canvas-container">
+                                <canvas id="solarBandCanvas" width="800" height="400"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-panel">
+                        <h3 class="chart-title">I-V Characteristics & Power Curve</h3>
+                        <div id="solarIvPlot" style="width: 100%; height: 300px;"></div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label class="control-label">Illumination (W/m²)</label>
+                        <input type="range" id="solarIllumination" min="0" max="1000" value="1000" step="50">
+                        <span class="slider-value" id="solarIlluminationValue">1000 W/m²</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Load Resistance (Ω)</label>
+                        <input type="range" id="solarLoad" min="1" max="100" value="10" step="1">
+                        <span class="slider-value" id="solarLoadValue">10 Ω</span>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <span class="status-value" id="solarVocValue">0.6</span>
+                            <span class="status-label">Voc (V)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="solarIscValue">35</span>
+                            <span class="status-label">Isc (mA)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="solarEfficiencyValue">20</span>
+                            <span class="status-label">Efficiency (%)</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="status-value" id="solarFillFactorValue">0.75</span>
+                            <span class="status-label">Fill Factor</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="resetSimulation()" style="flex: 1;">
+                            <i class="fas fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn btn-secondary" onclick="captureData()" style="flex: 1;">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Experiment -->
+        <div id="quiz" class="experiment-content">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <h2><i class="fas fa-brain"></i> Optoelectronics Quiz Challenge</h2>
+                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 1.1rem;">Test your knowledge of photodiodes, LEDs, and solar cells!</p>
+                </div>
+                <div style="text-align: center; color: rgba(255, 255, 255, 0.6);">
+                    <p>Quiz functionality will be implemented here...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Challenges Tab -->
+        <div id="challenges" class="experiment-content">
+            <div class="challenge-container">
+                <div class="challenge-header" style="text-align: center; margin-bottom: 20px;">
+                    <h2><i class="fas fa-tasks"></i> Optoelectronics Challenges</h2>
+                    <p style="color: #6b7280; font-size: 1.1rem;">Test your understanding with these interactive challenges</p>
+                </div>
+                
+                <div class="challenge-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="challengesCompleted">0</div>
+                        <div class="stat-label">Challenges Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalScore">0</div>
+                        <div class="stat-label">Total Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="hintsUsed">0</div>
+                        <div class="stat-label">Hints Used</div>
+                    </div>
+                </div>
+                
+                <div class="challenge-progress">
+                    <div class="challenge-progress-bar" id="challengeProgressBar" style="width: 0%"></div>
+                </div>
+                
+                <!-- Multiple Choice Questions Challenge -->
+                <div class="challenge-section" id="challenge1">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-list-ul"></i>
+                        </div>
+                        <div>
+                            <h3 class="challenge-title">Multiple Choice Quiz</h3>
+                            <p>Test your knowledge of optoelectronic devices</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        Select the correct answer for each question below. Each correct answer is worth 5 points.
+                    </div>
+                    
+                    <div id="mcqContent"></div>
+                    
+                    <div class="challenge-feedback" id="challenge1Feedback"></div>
+                    
+                    <div class="challenge-hint" id="challenge1Hint">
+                        <div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hint:</div>
+                        <div class="challenge-hint-content">For photodiodes, think about energy conversion. For LEDs, consider the semiconductor materials and their properties. For bandgap questions, remember that bandgap determines wavelength (E=hc/λ). For solar cells, consider what parameter measures how close a cell operates to its theoretical maximum.</div>
+                    </div>
+                    
+                    <div class="challenge-controls">
+                        <button class="challenge-btn challenge-btn-primary" onclick="checkQuizAnswers(1)">Check Answers</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="showQuizHints(1)">Show Hint</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="resetChallenge(1)">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Fill in the Blanks Challenge -->
+                <div class="challenge-section" id="challenge2">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <div>
+                            <h3 class="challenge-title">Fill in the Blanks</h3>
+                            <p>Complete the statements about optoelectronic principles</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        Fill in the blanks with the correct terms to complete each statement.
+                    </div>
+                    
+                    <div id="fillBlanksContent"></div>
+                    
+                    <div class="challenge-feedback" id="challenge2Feedback"></div>
+                    
+                    <div class="challenge-hint" id="challenge2Hint">
+                        <div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hint:</div>
+                        <div class="challenge-hint-content">For the first blank set, think about the relationship between light intensity and current in a photodiode, and how bias affects depletion width. For the second set, consider what happens when electrons and holes meet at the junction in an LED. For the third set, remember how temperature affects voltage and how light intensity affects current in solar cells.</div>
+                    </div>
+                    
+                    <div class="challenge-controls">
+                        <button class="challenge-btn challenge-btn-primary" onclick="checkFillBlanks()">Check Answers</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="showFillBlanksHint()">Show Hint</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="resetChallenge(2)">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Matching Challenge -->
+                <div class="challenge-section" id="challenge3">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="challenge-title">Matching Challenge</h3>
+                            <p>Match related concepts in optoelectronics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        Match each item on the left with its corresponding item on the right. Click on items to connect them.
+                    </div>
+                    
+                    <div id="matchingContent"></div>
+                    
+                    <div class="challenge-feedback" id="challenge3Feedback"></div>
+                    
+                    <div class="challenge-hint" id="challenge3Hint">
+                        <div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hint:</div>
+                        <div class="challenge-hint-content">Think about the primary function of each device: photodiodes convert incident light to electrical current, LEDs convert electrical energy to light, and solar cells specifically generate power from sunlight. For bias conditions, consider how they affect the energy barrier and depletion region at the junction.</div>
+                    </div>
+                    
+                    <div class="challenge-controls">
+                        <button class="challenge-btn challenge-btn-primary" onclick="checkMatching()">Check Answers</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="showMatchingHints()">Show Hint</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="resetChallenge(3)">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Advanced Concepts Challenge -->
+                <div class="challenge-section" id="challenge4">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div>
+                            <h3 class="challenge-title">Advanced Concepts</h3>
+                            <p>Test your understanding of complex optoelectronic principles</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        These questions test deeper understanding of optoelectronic principles and device physics.
+                    </div>
+                    
+                    <div id="advancedContent"></div>
+                    
+                    <div class="challenge-feedback" id="challenge4Feedback"></div>
+                    
+                    <div class="challenge-hint" id="challenge4Hint">
+                        <div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hint:</div>
+                        <div class="challenge-hint-content">For LED efficiency droop, consider what happens to carriers at high current densities (hint: it's a non-radiative process). For photodiode spectral response, think about what material property determines which wavelengths are absorbed at different depths. For solar cell theoretical limits, recall the fundamental limit named after two physicists that accounts for spectrum losses and recombination.</div>
+                    </div>
+                    
+                    <div class="challenge-controls">
+                        <button class="challenge-btn challenge-btn-primary" onclick="checkAdvancedAnswers()">Check Answers</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="showAdvancedHints()">Show Hint</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="resetChallenge(4)">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Calculation Challenge -->
+                <div class="challenge-section" id="challenge5">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3 class="challenge-title">Calculation Challenge</h3>
+                            <p>Solve numerical problems related to optoelectronic devices</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        Solve these calculation problems. Enter your answers with the correct units.
+                    </div>
+                    
+                    <div id="calculationContent"></div>
+                    
+                    <div class="challenge-feedback" id="challenge5Feedback"></div>
+                    
+                    <div class="challenge-hint" id="challenge5Hint">
+                        <div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hint:</div>
+                        <div class="challenge-hint-content">For the photodiode question, use I = R × P where R is responsivity and P is optical power. For the solar cell, use Pmax = Voc × Isc × FF where FF is fill factor. For the LED calculation, first find electrical power (P = V × I) then multiply by efficiency to get optical power.</div>
+                    </div>
+                    
+                    <div class="challenge-controls">
+                        <button class="challenge-btn challenge-btn-primary" onclick="checkCalculations()">Check Answers</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="showCalculationHint()">Show Hint</button>
+                        <button class="challenge-btn challenge-btn-secondary" onclick="resetChallenge(5)">Reset</button>
+                    </div>
+                </div>
+                
+                <div class="challenge-controls" style="margin-top: 30px; justify-content: center;">
+                    <button class="btn btn-primary" onclick="resetAllChallenges()">Reset All Challenges</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentDevice = 'photodiode';
+        let biasVoltage = 0;
+        let lightIntensity = 50;
+        let temperature = 300;
+        let dopingLevel = 5;
+        let loadResistance = 10;
+        let animationId;
+        let currentTrace = { x: [], y: [], time: [] };
+        let maxDataPoints = 50;
+
+        // Challenge system variables
+        let challengeAnswers = {
+            mcq: [],
+            fillBlanks: [],
+            matching: {},
+            advanced: [],
+            calculation: []
+        };
+
+        let challengeStates = {
+            1: false, // MCQ
+            2: false, // Fill in blanks
+            3: false, // Matching
+            4: false, // Advanced
+            5: false  // Calculation
+        };
+
+        let hintsUsed = 0;
+        let totalScore = 0;
+        let challengesCompleted = 0;
+        let currentQuestionHints = {};
+
+        // High DPI canvas setup
+        function setupHighDPICanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            // Set the actual size in memory (scaled for high DPI)
+            canvas.width = rect.width * devicePixelRatio;
+            canvas.height = rect.height * devicePixelRatio;
+            
+            // Scale the canvas back down using CSS
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            // Scale the drawing context so everything draws at the correct size
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            return ctx;
+        }
+
+        // Canvas references
+        let structureCanvas, bandCanvas, structureCtx, bandCtx, currentPlotDiv;
+        
+        function getCanvasElements(device) {
+            switch(device) {
+                case 'photodiode':
+                    return {
+                        structureCanvas: document.getElementById('structureCanvas'),
+                        bandCanvas: document.getElementById('bandCanvas'),
+                        plotDiv: 'ivPlot',
+                        particlesDiv: 'structureParticles'
+                    };
+                case 'led':
+                    return {
+                        structureCanvas: document.getElementById('ledStructureCanvas'),
+                        bandCanvas: document.getElementById('ledBandCanvas'),
+                        plotDiv: 'ledIvPlot',
+                        particlesDiv: 'ledStructureParticles'
+                    };
+                case 'solar':
+                    return {
+                        structureCanvas: document.getElementById('solarStructureCanvas'),
+                        bandCanvas: document.getElementById('solarBandCanvas'),
+                        plotDiv: 'solarIvPlot',
+                        particlesDiv: 'solarStructureParticles'
+                    };
+                default:
+                    return {
+                        structureCanvas: document.getElementById('structureCanvas'),
+                        bandCanvas: document.getElementById('bandCanvas'),
+                        plotDiv: 'ivPlot',
+                        particlesDiv: 'structureParticles'
+                    };
+            }
+        }
+
+        function initializeCanvases(device) {
+            const elements = getCanvasElements(device);
+            if (elements.structureCanvas && elements.bandCanvas) {
+                structureCanvas = elements.structureCanvas;
+                bandCanvas = elements.bandCanvas;
+                
+                // Setup high DPI canvases
+                structureCtx = setupHighDPICanvas(structureCanvas);
+                bandCtx = setupHighDPICanvas(bandCanvas);
+                
+                currentPlotDiv = elements.plotDiv;
+                return true;
+            }
+            return false;
+        }
+
+        // Function to switch experiment tabs
+        function switchExperimentTab(tabElement, experiment) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            // Add active class to clicked tab
+            tabElement.classList.add('active');
+            
+            // Hide all experiment content
+            document.querySelectorAll('.experiment-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            // Show selected experiment content
+            const selectedContent = document.getElementById(experiment);
+            selectedContent.classList.add('active');
+            selectedContent.style.display = 'block';
+            selectedContent.classList.add('fade-in');
+            
+            currentDevice = experiment;
+            
+            if (experiment !== 'quiz') {
+                setTimeout(() => {
+                    if (initializeCanvases(experiment)) {
+                        const elements = getCanvasElements(experiment);
+                        initializePlotly(elements.plotDiv);
+                        updateSimulation();
+                        if (animationId) {
+                            cancelAnimationFrame(animationId);
+                        }
+                        startAnimation();
+                    }
+                }, 100);
+            }
+        }
+
+        function initializePlotly(plotDivId = 'ivPlot') {
+            const layout = {
+                title: {
+                    text: 'Device Characteristics',
+                    font: { size: 16, color: '#1f2937' }
+                },
+                xaxis: {
+                    title: 'Voltage (V)',
+                    gridcolor: 'rgba(0, 0, 0, 0.1)',
+                    zerolinecolor: 'rgba(0, 0, 0, 0.3)',
+                    color: '#1f2937'
+                },
+                yaxis: {
+                    title: 'Current (mA)',
+                    gridcolor: 'rgba(0, 0, 0, 0.1)',
+                    zerolinecolor: 'rgba(0, 0, 0, 0.3)',
+                    color: '#1f2937'
+                },
+                plot_bgcolor: 'rgba(255, 255, 255, 0.7)',
+                paper_bgcolor: 'transparent',
+                font: { family: 'Inter, sans-serif', color: '#1f2937' },
+                margin: { l: 50, r: 30, t: 50, b: 50 },
+                height: 280,
+                showlegend: true,
+                legend: {
+                    x: 0.02,
+                    y: 0.98,
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: 'rgba(0, 0, 0, 0.2)',
+                    borderwidth: 1,
+                    font: { color: '#1f2937' }
+                },
+                hovermode: 'x unified'
+            };
+
+            const plotElement = document.getElementById(plotDivId);
+            if (plotElement) {
+                Plotly.newPlot(plotDivId, [], layout, {
+                    responsive: true,
+                    displayModeBar: false
+                });
+            }
+        }
+
+        function drawDeviceStructure() {
+            const rect = structureCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            structureCtx.clearRect(0, 0, width, height);
+            
+            // Enhanced background
+            const bgGradient = structureCtx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
+            bgGradient.addColorStop(0, 'rgba(26, 26, 46, 0.8)');
+            bgGradient.addColorStop(1, 'rgba(15, 15, 35, 0.9)');
+            structureCtx.fillStyle = bgGradient;
+            structureCtx.fillRect(0, 0, width, height);
+            
+            // Draw enhanced PN junction
+            const junctionX = width / 2;
+            const junctionY = height / 4;
+            const junctionHeight = height / 2;
+            
+            // P-region with modern gradient
+            const pGradient = structureCtx.createLinearGradient(0, junctionY, junctionX, junctionY);
+            pGradient.addColorStop(0, '#ef4444');
+            pGradient.addColorStop(0.7, '#dc2626');
+            pGradient.addColorStop(1, '#b91c1c');
+            structureCtx.fillStyle = pGradient;
+            structureCtx.fillRect(20, junctionY, junctionX - 20, junctionHeight);
+            
+            // P-region border with glow
+            structureCtx.shadowColor = '#ef4444';
+            structureCtx.shadowBlur = 10;
+            structureCtx.strokeStyle = '#f87171';
+            structureCtx.lineWidth = 3;
+            structureCtx.strokeRect(20, junctionY, junctionX - 20, junctionHeight);
+            structureCtx.shadowBlur = 0;
+            
+            // N-region with modern gradient
+            const nGradient = structureCtx.createLinearGradient(junctionX, junctionY, width, junctionY);
+            nGradient.addColorStop(0, '#1e3a8a');
+            nGradient.addColorStop(0.3, '#2563eb');
+            nGradient.addColorStop(1, '#3b82f6');
+            structureCtx.fillStyle = nGradient;
+            structureCtx.fillRect(junctionX, junctionY, width - junctionX - 20, junctionHeight);
+            
+            // N-region border with glow
+            structureCtx.shadowColor = '#3b82f6';
+            structureCtx.shadowBlur = 10;
+            structureCtx.strokeStyle = '#60a5fa';
+            structureCtx.lineWidth = 3;
+            structureCtx.strokeRect(junctionX, junctionY, width - junctionX - 20, junctionHeight);
+            structureCtx.shadowBlur = 0;
+            
+            // Enhanced depletion region
+            const depletionWidth = 40 + Math.abs(biasVoltage) * 20;
+            const depletionGradient = structureCtx.createLinearGradient(
+                junctionX - depletionWidth/2, junctionY,
+                junctionX + depletionWidth/2, junctionY
+            );
+            depletionGradient.addColorStop(0, 'rgba(156, 163, 175, 0.2)');
+            depletionGradient.addColorStop(0.5, 'rgba(107, 114, 128, 0.6)');
+            depletionGradient.addColorStop(1, 'rgba(156, 163, 175, 0.2)');
+            structureCtx.fillStyle = depletionGradient;
+            structureCtx.fillRect(junctionX - depletionWidth/2, junctionY, depletionWidth, junctionHeight);
+            
+            // Labels with modern typography
+            structureCtx.fillStyle = '#ffffff';
+            structureCtx.font = 'bold 28px Inter';
+            structureCtx.textAlign = 'center';
+            structureCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            structureCtx.shadowBlur = 5;
+            structureCtx.fillText('P', junctionX/2, height/2 + 10);
+            structureCtx.fillText('N', junctionX + (width - junctionX)/2, height/2 + 10);
+            structureCtx.shadowBlur = 0;
+            
+            // Device-specific enhancements
+            drawDeviceSpecificEffects();
+            
+            // Modern info display
+            drawModernInfoPanel();
+        }
+
+        function drawDeviceSpecificEffects() {
+            const rect = structureCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            if (currentDevice === 'photodiode' || currentDevice === 'solar') {
+                drawEnhancedPhotons(width, height);
+            } else if (currentDevice === 'led') {
+                drawEnhancedLEDEmission(width, height);
+            }
+        }
+
+        function drawEnhancedPhotons(width, height) {
+            if (lightIntensity === 0) return;
+            
+            const numRays = Math.floor(lightIntensity / 20) + 3;
+            const time = Date.now() * 0.001;
+            
+            for (let i = 0; i < numRays; i++) {
+                const x = (i + 1) * (width / (numRays + 1));
+                const phase = time + i * 0.8;
+                const intensity = 0.7 + Math.sin(phase * 2) * 0.3;
+                
+                // Photon beam with enhanced effects
+                const beamGradient = structureCtx.createLinearGradient(x, 0, x, height/3);
+                beamGradient.addColorStop(0, `rgba(251, 191, 36, ${intensity * 0.9})`);
+                beamGradient.addColorStop(0.5, `rgba(245, 158, 11, ${intensity * 0.7})`);
+                beamGradient.addColorStop(1, `rgba(217, 119, 6, ${intensity * 0.3})`);
+                
+                structureCtx.strokeStyle = beamGradient;
+                structureCtx.lineWidth = 4;
+                structureCtx.lineCap = 'round';
+                
+                // Glow effect
+                structureCtx.shadowColor = '#fbbf24';
+                structureCtx.shadowBlur = 15;
+                
+                structureCtx.beginPath();
+                structureCtx.moveTo(x, 0);
+                structureCtx.lineTo(x, height/3);
+                structureCtx.stroke();
+                
+                structureCtx.shadowBlur = 0;
+                
+                // Photon particles
+                for (let j = 0; j < 4; j++) {
+                    const particleY = (j + 1) * (height/4) / 5;
+                    const particleOffset = Math.sin(phase * 4 + j) * 3;
+                    
+                    structureCtx.fillStyle = `rgba(251, 191, 36, ${intensity})`;
+                    structureCtx.beginPath();
+                    structureCtx.arc(x + particleOffset, particleY, 3, 0, Math.PI * 2);
+                    structureCtx.fill();
+                }
+            }
+        }
+
+        function drawEnhancedLEDEmission(width, height) {
+            if (biasVoltage <= 0.6) return;
+            
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const time = Date.now() * 0.002;
+            const intensity = Math.min((biasVoltage - 0.6) * 10, 10); // Adjusted intensity calculation for 1V max
+            
+            // Central emission glow
+            const glowRadius = 80 + intensity * 10;
+            const glowGradient = structureCtx.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, glowRadius
+            );
+            glowGradient.addColorStop(0, `rgba(16, 185, 129, ${0.8})`);
+            glowGradient.addColorStop(0.4, `rgba(5, 150, 105, ${0.5})`);
+            glowGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            
+            structureCtx.fillStyle = glowGradient;
+            structureCtx.fillRect(centerX - glowRadius, centerY - glowRadius, 
+                                glowRadius * 2, glowRadius * 2);
+            
+            // Emission rays
+            const numRays = 16;
+            for (let i = 0; i < numRays; i++) {
+                const angle = (i / numRays) * 2 * Math.PI + time;
+                const rayLength = 60 + intensity * 8;
+                const endX = centerX + Math.cos(angle) * rayLength;
+                const endY = centerY + Math.sin(angle) * rayLength;
+                
+                structureCtx.strokeStyle = `rgba(52, 211, 153, ${0.7})`;
+                structureCtx.lineWidth = 3;
+                structureCtx.shadowColor = '#34d399';
+                structureCtx.shadowBlur = 10;
+                
+                structureCtx.beginPath();
+                structureCtx.moveTo(centerX, centerY);
+                structureCtx.lineTo(endX, endY);
+                structureCtx.stroke();
+            }
+            
+            structureCtx.shadowBlur = 0;
+        }
+
+        function drawBandDiagram() {
+            const rect = bandCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            bandCtx.clearRect(0, 0, width, height);
+            
+            // Enhanced background
+            const bgGradient = bandCtx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
+            bgGradient.addColorStop(0, 'rgba(26, 26, 46, 0.8)');
+            bgGradient.addColorStop(1, 'rgba(15, 15, 35, 0.9)');
+            bandCtx.fillStyle = bgGradient;
+            bandCtx.fillRect(0, 0, width, height);
+            
+            // Energy levels
+            const Ec = height * 0.25;
+            const Ev = height * 0.65;
+            const Ef = height * 0.45;
+            const junctionCenter = width * 0.5;
+            
+            // P and N regions
+            bandCtx.fillStyle = 'rgba(239, 68, 68, 0.1)';
+            bandCtx.fillRect(0, 0, junctionCenter, height);
+            
+            bandCtx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+            bandCtx.fillRect(junctionCenter, 0, width - junctionCenter, height);
+            
+            // Band lines with enhanced styling
+            const biasEffect = biasVoltage * 40;
+            const depletionWidth = 60 + Math.abs(biasVoltage) * 16;
+            const depletionStart = junctionCenter - depletionWidth/2;
+            const depletionEnd = junctionCenter + depletionWidth/2;
+            
+            // Conduction band
+            bandCtx.strokeStyle = '#3b82f6';
+            bandCtx.lineWidth = 4;
+            bandCtx.lineCap = 'round';
+            bandCtx.shadowColor = '#3b82f6';
+            bandCtx.shadowBlur = 8;
+            
+            bandCtx.beginPath();
+            bandCtx.moveTo(0, Ec);
+            bandCtx.lineTo(depletionStart, Ec);
+            bandCtx.lineTo(depletionEnd, Ec - biasEffect);
+            bandCtx.lineTo(width, Ec - biasEffect);
+            bandCtx.stroke();
+            
+            // Valence band
+            bandCtx.strokeStyle = '#ef4444';
+            bandCtx.beginPath();
+            bandCtx.moveTo(0, Ev);
+            bandCtx.lineTo(depletionStart, Ev);
+            bandCtx.lineTo(depletionEnd, Ev - biasEffect);
+            bandCtx.lineTo(width, Ev - biasEffect);
+            bandCtx.stroke();
+            
+            bandCtx.shadowBlur = 0;
+            
+            // Fermi level
+            bandCtx.strokeStyle = '#94a3b8';
+            bandCtx.lineWidth = 2;
+            bandCtx.setLineDash([10, 5]);
+            bandCtx.beginPath();
+            bandCtx.moveTo(0, Ef);
+            bandCtx.lineTo(width, Ef);
+            bandCtx.stroke();
+            bandCtx.setLineDash([]);
+            
+            // Labels with modern styling
+            bandCtx.fillStyle = '#ffffff';
+            bandCtx.font = 'bold 18px Inter';
+            bandCtx.textAlign = 'left';
+            bandCtx.fillText('Ec', 20, Ec - 10);
+            bandCtx.textAlign = 'right';
+            bandCtx.fillStyle = '#fbbf24'; // Yellow color for Ev
+            bandCtx.fillText('Ev', width - 20, Ev - 10);
+            bandCtx.fillStyle = '#ffffff';
+            bandCtx.textAlign = 'left';
+            bandCtx.fillText('Ef', 20, Ef - 10);
+            
+
+               // Bandgap annotation (arrow and label)
+               const bandGap = 1.12 - (temperature - 300) * 0.0004;
+               bandCtx.strokeStyle = '#6b7280';
+               bandCtx.lineWidth = 2;
+               bandCtx.setLineDash([4, 4]);
+               const arrowX = width - 60;
+               bandCtx.beginPath();
+               bandCtx.moveTo(arrowX, Ec);
+               bandCtx.lineTo(arrowX, Ev);
+               bandCtx.stroke();
+               bandCtx.setLineDash([]);
+               bandCtx.fillStyle = '#6b7280';
+               bandCtx.beginPath();
+               bandCtx.moveTo(arrowX, Ec);
+               bandCtx.lineTo(arrowX - 4, Ec + 8);
+               bandCtx.lineTo(arrowX + 4, Ec + 8);
+               bandCtx.closePath();
+               bandCtx.fill();
+               bandCtx.beginPath();
+               bandCtx.moveTo(arrowX, Ev);
+               bandCtx.lineTo(arrowX - 4, Ev - 8);
+               bandCtx.lineTo(arrowX + 4, Ev - 8);
+               bandCtx.closePath();
+               bandCtx.fill();
+               bandCtx.font = 'bold 13px Inter';
+               bandCtx.textAlign = 'center';
+               bandCtx.fillStyle = '#fbbf24'; // yellow for visibility
+               bandCtx.fillText(`Eg = ${bandGap.toFixed(2)} eV`, arrowX, (Ec + Ev) / 2);
+
+               // Physics info (bandgap, temperature, bias voltage)
+               bandCtx.font = 'bold 13px Inter';
+               bandCtx.textAlign = 'right';
+               bandCtx.fillStyle = '#fbbf24'; // yellow for high visibility
+               bandCtx.shadowColor = 'rgba(255,255,255,0.7)';
+               bandCtx.shadowBlur = 2;
+               bandCtx.fillText(`Bandgap: ${bandGap.toFixed(2)} eV`, width - 14, 62);
+               bandCtx.fillText(`Temperature: ${temperature} K`, width - 14, 82);
+               bandCtx.fillText(`Bias: ${biasVoltage.toFixed(1)} V`, width - 14, 102);
+               
+               // Show illumination intensity for solar cell
+               if (currentDevice === 'solar') {
+                   const sunlightIntensity = parseFloat(document.getElementById('solarIllumination')?.value || 0);
+                   bandCtx.fillText(`Illumination: ${sunlightIntensity} W/m²`, width - 14, 122);
+               }
+               bandCtx.shadowBlur = 0;
+
+               // Device operation annotation for LED
+               if (currentDevice === 'led' && biasVoltage > 0.7) {
+                   bandCtx.font = 'bold 14px Inter';
+                   bandCtx.textAlign = 'right';
+                   bandCtx.fillStyle = '#FFD700'; // Yellow color
+                   bandCtx.fillText('💡 Electroluminescence', width - 20, height - 60);
+                   bandCtx.font = '12px Inter';
+                   bandCtx.fillText('Forward bias injects carriers', width - 20, height - 40);
+                   bandCtx.fillText('Radiative recombination → light', width - 20, height - 20);
+               }
+               
+               // Device operation annotation for solar cell
+               if (currentDevice === 'solar') {
+                   const sunlightIntensity = parseFloat(document.getElementById('solarIllumination')?.value || 0);
+                   // Draw photon arrows and generation effects based on illumination intensity
+                   if (sunlightIntensity > 0) {
+                       const photonCount = Math.min(Math.ceil(sunlightIntensity / 100), 10); // Scale number of photons with intensity
+                       
+                       // Draw photons as arrows coming from top
+                       bandCtx.fillStyle = '#FFD700'; // Yellow for photons
+                       bandCtx.strokeStyle = '#FFD700';
+                       bandCtx.lineWidth = 2;
+                       
+                       for (let i = 0; i < photonCount; i++) {
+                           const photonX = width * 0.3 + (width * 0.4 * i / photonCount);
+                           const photonStartY = 80;
+                           const photonEndY = (Ec + Ev) / 2;
+                           
+                           // Draw wavy photon line
+                           bandCtx.beginPath();
+                           bandCtx.moveTo(photonX, photonStartY);
+                           const amplitude = 6;
+                           const frequency = 0.1;
+                           for (let y = photonStartY; y < photonEndY; y += 2) {
+                               const x = photonX + amplitude * Math.sin(frequency * (y - photonStartY));
+                               bandCtx.lineTo(x, y);
+                           }
+                           bandCtx.stroke();
+                           
+                           // Draw arrow tip
+                           bandCtx.beginPath();
+                           bandCtx.moveTo(photonX, photonEndY);
+                           bandCtx.lineTo(photonX - 4, photonEndY - 8);
+                           bandCtx.lineTo(photonX + 4, photonEndY - 8);
+                           bandCtx.closePath();
+                           bandCtx.fill();
+                       }
+                       
+                       // Draw electron-hole generation
+                       const genCount = Math.min(Math.ceil(sunlightIntensity / 150), 5);
+                       bandCtx.font = 'bold 14px Inter';
+                       bandCtx.textAlign = 'center';
+                       bandCtx.fillStyle = '#FFD700';
+                       bandCtx.fillText('Photogeneration', width / 2, height - 60);
+                       bandCtx.font = '12px Inter';
+                       bandCtx.fillText('Light creates electron-hole pairs', width / 2, height - 40);
+                       bandCtx.fillText('Carriers separated by junction field', width / 2, height - 20);
+                       
+                       // Draw some electron-hole pairs
+                       for (let i = 0; i < genCount; i++) {
+                           const genX = width * 0.3 + (width * 0.4 * i / genCount);
+                           const electronY = Ec + 10;
+                           const holeY = Ev - 10;
+                           
+                           // Electron
+                           bandCtx.fillStyle = '#3b82f6';
+                           bandCtx.beginPath();
+                           bandCtx.arc(genX, electronY, 5, 0, Math.PI * 2);
+                           bandCtx.fill();
+                           bandCtx.fillStyle = '#ffffff';
+                           bandCtx.font = '8px Arial';
+                           bandCtx.textAlign = 'center';
+                           bandCtx.fillText('-', genX, electronY + 3);
+                           
+                           // Hole
+                           bandCtx.fillStyle = '#ef4444';
+                           bandCtx.beginPath();
+                           bandCtx.arc(genX, holeY, 5, 0, Math.PI * 2);
+                           bandCtx.fill();
+                           bandCtx.fillStyle = '#ffffff';
+                           bandCtx.fillText('+', genX, holeY + 3);
+                       }
+                   }
+               }
+
+               // Electric field direction arrow in depletion region
+               if (Math.abs(biasVoltage) > 0.1) {
+                   bandCtx.strokeStyle = '#9333ea';
+                   bandCtx.lineWidth = 2;
+                   bandCtx.lineCap = 'round';
+                   const fieldDirection = biasVoltage > 0 ? -1 : 1;
+                   const fieldX = junctionCenter;
+                   const fieldY = (Ec + Ev) / 2;
+                   bandCtx.beginPath();
+                   bandCtx.moveTo(fieldX - 15 * fieldDirection, fieldY);
+                   bandCtx.lineTo(fieldX + 15 * fieldDirection, fieldY);
+                   bandCtx.stroke();
+                   bandCtx.fillStyle = '#9333ea';
+                   bandCtx.beginPath();
+                   bandCtx.moveTo(fieldX + 15 * fieldDirection, fieldY);
+                   bandCtx.lineTo(fieldX + 10 * fieldDirection, fieldY - 4);
+                   bandCtx.lineTo(fieldX + 10 * fieldDirection, fieldY + 4);
+                   bandCtx.closePath();
+                   bandCtx.fill();
+                   bandCtx.font = '10px Inter';
+                   bandCtx.textAlign = 'center';
+                   bandCtx.fillText('E-field', fieldX, fieldY - 12);
+               }
+
+               // Built-in potential annotation (ΔV)
+               if (Math.abs(biasVoltage) > 0.1) {
+                   bandCtx.strokeStyle = biasVoltage > 0 ? '#10b981' : '#ef4444';
+                   bandCtx.lineWidth = 2;
+                   bandCtx.setLineDash([6, 4]);
+                   const barrierHeight = Math.abs(biasVoltage) * 15;
+                   bandCtx.beginPath();
+                   bandCtx.moveTo(junctionCenter - 40, Ec + barrierHeight);
+                   bandCtx.lineTo(junctionCenter + 40, Ec + barrierHeight);
+                   bandCtx.stroke();
+                   bandCtx.setLineDash([]);
+                   bandCtx.font = '12px Inter';
+                   bandCtx.textAlign = 'center';
+                   bandCtx.fillStyle = biasVoltage > 0 ? '#10b981' : '#ef4444';
+                   bandCtx.fillText(biasVoltage > 0 ? 'Forward Bias' : 'Reverse Bias', junctionCenter, Ec + barrierHeight - 10);
+                   bandCtx.fillText(`ΔV = ${Math.abs(biasVoltage).toFixed(1)}V`, junctionCenter, Ec + barrierHeight + 18);
+               }
+               bandCtx.font = '14px Inter';
+               bandCtx.fillText('Conduction Band', 120, Ec + 20);
+               bandCtx.fillText('Valence Band', 100, Ev + 40);
+               bandCtx.fillText('Fermi Level', 85, Ef + 20);
+            
+            // Region labels
+            bandCtx.font = 'bold 24px Inter';
+            bandCtx.textAlign = 'center';
+            bandCtx.fillStyle = '#ef4444';
+            bandCtx.fillText('P-type', junctionCenter/2, 40);
+            
+            bandCtx.fillStyle = '#3b82f6';
+            bandCtx.fillText('N-type', junctionCenter + (width - junctionCenter)/2, 40);
+        }
+
+        function drawModernInfoPanel() {
+            const rect = structureCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            // Info panel background
+            const panelGradient = structureCtx.createLinearGradient(0, height - 80, 0, height);
+            panelGradient.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
+            panelGradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+            structureCtx.fillStyle = panelGradient;
+            structureCtx.fillRect(0, height - 80, width, 80);
+            
+            // Border
+            structureCtx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+            structureCtx.lineWidth = 2;
+            structureCtx.strokeRect(0, height - 80, width, 80);
+            
+            // Device info
+            structureCtx.fillStyle = '#ffffff';
+            structureCtx.font = 'bold 16px Inter';
+            structureCtx.textAlign = 'left';
+            
+            const deviceNames = {
+                'photodiode': '📸 Photodiode',
+                'led': '💡 LED',
+                'solar': '☀️ Solar Cell'
+            };
+            
+            structureCtx.fillText(deviceNames[currentDevice] || '🔬 Device', 20, height - 60);
+            
+            structureCtx.font = '12px Inter';
+            structureCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            structureCtx.fillText(`Bias: ${biasVoltage.toFixed(1)}V`, 20, height - 40);
+            structureCtx.fillText(`Light: ${lightIntensity} mW/cm²`, 20, height - 20);
+            
+            structureCtx.fillText(`Temp: ${temperature}K`, 200, height - 40);
+            structureCtx.fillText(`Current: ${calculateCurrent().toFixed(3)} mA`, 200, height - 20);
+        }
+
+        function updateSimulation() {
+            drawDeviceStructure();
+            drawBandDiagram();
+            updatePlotlyGraph();
+            updateStatusValues();
+            
+            // Add solar cell specific simulation updates
+            if (currentDevice === 'solar') {
+                updateSolarSimulation();
+            }
+        }
+        
+        function updateSolarSimulation() {
+            // Solar cell specific calculations
+            // Use direct value from the slider (0-1000 W/m²)
+            const sunlightIntensity = parseFloat(document.getElementById('solarIllumination').value);
+            
+            // Get actual load resistance from the slider
+            const currentLoadResistance = parseFloat(document.getElementById('solarLoad').value);
+            
+            // Calculate solar cell parameters based on illumination and load
+            const cellArea = 0.001; // m²
+            const efficiency = 0.18; // 18% efficiency
+            const powerIn = sunlightIntensity * cellArea;
+            const maxPower = powerIn * efficiency;
+            
+            // Open circuit voltage and short circuit current estimates that respond strongly to illumination
+            const voc = 0.5 + 0.1 * Math.log10(sunlightIntensity + 1);
+            const isc = 0.05 * sunlightIntensity/1000 * cellArea * 1000; // in mA
+            
+            // Maximum power point (simplified calculation)
+            const vmp = voc * 0.8;
+            const imp = isc * 0.9;
+            
+            // Operating point based on load resistance - more realistic calculation
+            const opVoltage = Math.min(voc * currentLoadResistance / (currentLoadResistance + 5), voc);
+            
+            // Calculate operating current using the same model as the I-V curve
+            const normV = opVoltage / voc; // Normalized voltage (0 to 1)
+            const opCurrent = isc * (1 - normV * (1.4 - 0.4 * normV)); // Matches the I-V curve calculation
+            
+            // Update the IV curve and operating point
+            updateSolarIVCurve(voc, isc, vmp, imp, opVoltage, opCurrent);
+            
+            // Explicitly update band diagram to show illumination effects
+            drawBandDiagram();
+            
+            // Update status values specific to solar cells
+            // Calculate power and efficiency values
+            const power = opVoltage * opCurrent;
+            const calculatedEfficiency = (power / powerIn) * 100;
+            const fillFactor = (vmp * imp) / (voc * isc);
+            
+            // Update the solar cell status display elements
+            document.getElementById('solarVocValue').textContent = voc.toFixed(2);
+            document.getElementById('solarIscValue').textContent = isc.toFixed(1);
+            document.getElementById('solarEfficiencyValue').textContent = calculatedEfficiency.toFixed(1);
+            document.getElementById('solarFillFactorValue').textContent = fillFactor.toFixed(2);
+        }
+        
+        function updateSolarIVCurve(voc, isc, vmp, imp, opVoltage, opCurrent) {
+            // Generate solar cell IV curve points
+            const voltages = [];
+            const currents = [];
+            const powerPoints = []; // For power curve
+            
+            // Generate proper solar cell I-V characteristic curve
+            for (let v = 0; v <= voc * 1.2; v += 0.01) {
+                // Improved solar cell model that produces the correct I-V shape
+                // Diode equation: I = Isc - I0 * (exp(V/Vt) - 1)
+                const thermalVoltage = 0.026; // at room temperature
+                const idealityFactor = 1.2;
+                
+                // Use the correct solar cell equation (current should decrease as voltage increases)
+                // This equation produces the standard solar cell I-V curve shape
+                let i = 0;
+                if (v <= voc) {
+                    // More stable equation that avoids extreme exponential values
+                    // I = Isc * (1 - k * exp((V-Voc)/Vt))
+                    const normV = v / voc; // Normalized voltage (0 to 1)
+                    i = isc * (1 - normV * (1.4 - 0.4 * normV)); // Quadratic approximation
+                }
+                
+                // Apply reasonable limits to ensure current stays in range
+                const limitedCurrent = Math.min(Math.max(i, 0), isc * 1.05); // Ensure sensible range
+                
+                voltages.push(v);
+                currents.push(limitedCurrent);
+                powerPoints.push(v * limitedCurrent); // Calculate power at each point
+            }
+            
+            // Operating point marker
+            const opTrace = {
+                x: [opVoltage],
+                y: [opCurrent],
+                mode: 'markers',
+                marker: {
+                    size: 10,
+                    color: '#10b981',
+                    symbol: 'circle',
+                    line: {
+                        color: 'white',
+                        width: 2
+                    }
+                },
+                name: 'Operating Point'
+            };
+            
+            // Maximum power point marker
+            const mpTrace = {
+                x: [vmp],
+                y: [imp],
+                mode: 'markers',
+                marker: {
+                    size: 10,
+                    color: '#f59e0b',
+                    symbol: 'star',
+                    line: {
+                        color: 'white',
+                        width: 2
+                    }
+                },
+                name: 'Max Power'
+            };
+            
+            // IV curve
+            const ivTrace = {
+                x: voltages,
+                y: currents,
+                type: 'scatter',
+                mode: 'lines',
+                line: {
+                    color: '#3b82f6',
+                    width: 3
+                },
+                name: 'IV Curve'
+            };
+            
+            // Add power curve
+            const powerTrace = {
+                x: voltages,
+                y: powerPoints,
+                type: 'scatter',
+                mode: 'lines',
+                line: {
+                    color: '#10b981', // Green for power
+                    width: 2,
+                    dash: 'dash'
+                },
+                name: 'Power',
+                yaxis: 'y2' // Use secondary y-axis
+            };
+            
+            // Update plot with both IV and power curves
+            if (document.getElementById('solarIvPlot')) {
+                Plotly.newPlot('solarIvPlot', [ivTrace, mpTrace, opTrace, powerTrace], {
+                    title: {
+                        text: 'Solar Cell Characteristics',
+                        font: { size: 14 }
+                    },
+                    margin: { t: 30, r: 60, l: 60, b: 40 }, // Compact margins
+                    xaxis: { 
+                        title: 'Voltage (V)',
+                        titlefont: { size: 12 }
+                    },
+                    yaxis: { 
+                        title: 'Current (mA)',
+                        titlefont: {color: '#3b82f6', size: 12}
+                    },
+                    yaxis2: {
+                        title: 'Power (mW)',
+                        titlefont: {color: '#10b981', size: 12},
+                        overlaying: 'y',
+                        side: 'right'
+                    },
+                    plot_bgcolor: 'rgba(255, 255, 255, 0.7)',
+                    paper_bgcolor: 'transparent',
+                    legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, font: { size: 10 } }
+                }, { responsive: true, displayModeBar: false });
+            }
+        }
+
+        function updatePlotlyGraph() {
+            const voltages = [];
+            const currents = [];
+            
+            // Use device-specific voltage ranges to avoid extreme values
+            let minVoltage, maxVoltage, voltageStep;
+            
+            switch (currentDevice) {
+                case 'photodiode':
+                    minVoltage = -1;
+                    maxVoltage = 1;
+                    voltageStep = 0.02;
+                    break;
+                case 'led':
+                    minVoltage = -0.5; 
+                    maxVoltage = 3;   // Limit to reasonable LED forward voltage
+                    voltageStep = 0.05;
+                    break;
+                case 'solar':
+                    minVoltage = -0.2;
+                    maxVoltage = 0.8; // Typical solar cell voltage range
+                    voltageStep = 0.01;
+                    break;
+                default:
+                    minVoltage = -1;
+                    maxVoltage = 1;
+                    voltageStep = 0.02;
+            }
+            
+            for (let v = minVoltage; v <= maxVoltage; v += voltageStep) {
+                voltages.push(v);
+                currents.push(calculateCurrentForVoltage(v, lightIntensity));
+            }
+
+            const traces = [{
+                x: voltages,
+                y: currents,
+                type: 'scatter',
+                mode: 'lines',
+                name: `${currentDevice.toUpperCase()}`,
+                line: { color: '#6366f1', width: 3 }
+            }];
+
+            // Operating point
+            const operatingCurrent = calculateCurrent();
+            traces.push({
+                x: [biasVoltage],
+                y: [operatingCurrent],
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Operating Point',
+                marker: { color: '#ef4444', size: 12, symbol: 'circle' }
+            });
+
+            const plotDiv = currentPlotDiv || 'ivPlot';
+            Plotly.react(plotDiv, traces);
+        }
+
+        function calculateCurrentForVoltage(voltage, intensity = lightIntensity) {
+            const thermalVoltage = 0.026; // kT/q at room temperature
+            const saturationCurrent = 1e-9;
+            let current = 0;
+            
+            switch (currentDevice) {
+                case 'photodiode':
+                    const photoCurrent = intensity * 0.005; // mA
+                    // Calculate current with exponential capped for stability
+                    const expTerm = Math.min(Math.exp(voltage / thermalVoltage), 1000); // Cap the exponential growth
+                    current = saturationCurrent * (expTerm - 1) - photoCurrent;
+                    // Hard limit to prevent excessive values
+                    return Math.max(Math.min(current, 5), -5); // Limit to ±5mA
+                    
+                case 'led':
+                    if (voltage > 0) {
+                        // Use a more controlled LED current calculation with limits
+                        const idealCurrent = saturationCurrent * (Math.exp(voltage / (2 * thermalVoltage)) - 1);
+                        // Apply a sigmoid-like function to limit growth
+                        current = 20 * (1 - Math.exp(-idealCurrent / 10));
+                        return Math.min(current, 25); // Cap at 25mA
+                    }
+                    return -saturationCurrent; // Reverse bias leakage current
+                    
+                case 'solar':
+                    const solarPhotoCurrent = intensity * 0.008; // mA
+                    
+                    // For solar cells, use a more realistic I-V curve shape
+                    if (voltage <= 0.6) { // Only calculate positive current for typical Voc range
+                        // Same model as in updateSolarIVCurve for consistency
+                        const normV = voltage / 0.6; // Normalized voltage (0 to 1)
+                        current = solarPhotoCurrent * (1 - normV * (1.4 - 0.4 * normV)); // Quadratic approximation
+                        return Math.max(Math.min(current, solarPhotoCurrent * 1.05), 0);
+                    }
+                    return 0; // Beyond Voc, current is zero
+                    
+                default:
+                    return 0;
+            }
+        }
+
+        function calculateCurrent() {
+            return calculateCurrentForVoltage(biasVoltage, lightIntensity);
+        }
+
+        function updateStatusValues() {
+            const current = calculateCurrent();
+            const power = Math.abs(current * biasVoltage);
+            
+            document.getElementById('currentValue').textContent = current.toFixed(3);
+            document.getElementById('powerValue').textContent = power.toFixed(4);
+            document.getElementById('voltageValue').textContent = biasVoltage.toFixed(2);
+            document.getElementById('temperatureValue').textContent = temperature.toString();
+            
+            // Update LED-specific status values
+            if (currentDevice === 'led') {
+                // Only show LED emission for forward bias above threshold
+                if (biasVoltage > 0.6) {
+                    // Calculate LED power (increases with voltage above threshold)
+                    const ledPower = Math.round((biasVoltage - 0.6) * 100);
+                    document.getElementById('ledPowerValue').textContent = ledPower;
+                    
+                    // Calculate LED brightness (increases with voltage)
+                    const ledBrightness = Math.round((biasVoltage / 1.5) * 100);
+                    document.getElementById('ledBrightnessValue').textContent = ledBrightness;
+                    
+                    // Calculate wavelength (depends on voltage - higher voltage, shorter wavelength)
+                    const ledWavelength = Math.round(650 - (biasVoltage - 0.6) * 100);
+                    document.getElementById('ledWavelengthValue').textContent = ledWavelength;
+                    
+                    // Calculate efficiency (decreases slightly with higher voltage)
+                    const ledEfficiency = Math.round(25 - (biasVoltage - 0.6) * 10);
+                    document.getElementById('ledEfficiencyValue').textContent = ledEfficiency;
+                } else {
+                    // Below threshold, LED is off
+                    document.getElementById('ledPowerValue').textContent = '0';
+                    document.getElementById('ledBrightnessValue').textContent = '0';
+                    document.getElementById('ledWavelengthValue').textContent = '650';
+                    document.getElementById('ledEfficiencyValue').textContent = '25';
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            // Photodiode controls
+            document.getElementById('biasVoltage').addEventListener('input', function() {
+                biasVoltage = parseFloat(this.value);
+                document.getElementById('biasValue').textContent = biasVoltage.toFixed(2) + ' V';
+                updateSimulation();
+            });
+
+            document.getElementById('lightIntensity').addEventListener('input', function() {
+                lightIntensity = parseFloat(this.value);
+                document.getElementById('lightValue').textContent = lightIntensity + ' mW/cm²';
+                updateSimulation();
+            });
+
+            document.getElementById('temperature').addEventListener('input', function() {
+                temperature = parseFloat(this.value);
+                document.getElementById('tempValue').textContent = temperature + ' K';
+                updateSimulation();
+            });
+
+            document.getElementById('doping').addEventListener('input', function() {
+                dopingLevel = parseFloat(this.value);
+                document.getElementById('dopingValue').textContent = dopingLevel + '×10¹⁶ cm⁻³';
+                updateSimulation();
+            });
+
+            // LED controls
+            const ledVoltageSlider = document.getElementById('ledVoltage');
+            if (ledVoltageSlider) {
+                ledVoltageSlider.addEventListener('input', function() {
+                    biasVoltage = parseFloat(this.value);
+                    document.getElementById('ledVoltageValue').textContent = biasVoltage.toFixed(2) + ' V';
+                    updateSimulation();
+                });
+            }
+
+            // Solar controls
+            const solarIlluminationSlider = document.getElementById('solarIllumination');
+            if (solarIlluminationSlider) {
+                solarIlluminationSlider.addEventListener('input', function() {
+                    lightIntensity = parseFloat(this.value) / 10;
+                    document.getElementById('solarIlluminationValue').textContent = parseFloat(this.value) + ' W/m²';
+                    updateSimulation();
+                });
+            }
+            
+            // Solar load resistance control
+            const solarLoadSlider = document.getElementById('solarLoad');
+            if (solarLoadSlider) {
+                solarLoadSlider.addEventListener('input', function() {
+                    loadResistance = parseFloat(this.value);
+                    document.getElementById('solarLoadValue').textContent = loadResistance + ' Ω';
+                    updateSimulation();
+                });
+            }
+        }
+
+        function startAnimation() {
+            function animate() {
+                updateSimulation();
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function resetSimulation() {
+            biasVoltage = 0;
+            lightIntensity = 50;
+            temperature = 300;
+            dopingLevel = 5;
+            
+            // Reset sliders
+            const sliders = [
+                { id: 'biasVoltage', value: 0, display: 'biasValue', unit: ' V' },
+                { id: 'lightIntensity', value: 50, display: 'lightValue', unit: ' mW/cm²' },
+                { id: 'temperature', value: 300, display: 'tempValue', unit: ' K' },
+                { id: 'doping', value: 5, display: 'dopingValue', unit: '×10¹⁶ cm⁻³' }
+            ];
+            
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider.id);
+                if (element) {
+                    element.value = slider.value;
+                    const display = document.getElementById(slider.display);
+                    if (display) {
+                        display.textContent = slider.value + slider.unit;
+                    }
+                }
+            });
+            
+            updateSimulation();
+        }
+
+        function captureData() {
+            const data = {
+                device: currentDevice,
+                parameters: {
+                    biasVoltage: biasVoltage,
+                    lightIntensity: lightIntensity,
+                    temperature: temperature,
+                    dopingLevel: dopingLevel
+                },
+                measurements: {
+                    current: calculateCurrent(),
+                    power: Math.abs(calculateCurrent() * biasVoltage)
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `optoelectronics_${currentDevice}_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Tour variables
+        let tourActive = false;
+        let currentTourStep = 0;
+        let helpPanelVisible = false;
+        let deviceSpecificSteps = [];
+        let currentDeviceStep = 0;
+        let inDeviceSpecificTour = false;
+
+        // Tour steps definition
+        const tourSteps = [
+            {
+                title: "Welcome to Optoelectronics Lab",
+                content: "This interactive simulation will help you understand how photodiodes, LEDs, and solar cells work. Let's explore each component together!",
+                target: ".experiment-tabs",
+                position: "bottom"
+            },
+            {
+                title: "Experiment Tabs",
+                content: "These tabs let you switch between three different optoelectronic devices: photodiode, LED, and solar cell. Each has unique properties and applications.",
+                target: ".experiment-tabs",
+                position: "bottom"
+            },
+            {
+                title: "Device Structure",
+                content: "This visualization shows the physical structure of the semiconductor device. You can see the P-N junction and observe how charges and light interact in real-time.",
+                target: ".experiment-content.active canvas:first-of-type",
+                position: "right"
+            },
+            {
+                title: "Energy Band Diagram",
+                content: "The band diagram shows the energy levels in the semiconductor. You can see how the conduction band, valence band, and Fermi level are affected by applied voltage and light.",
+                target: ".experiment-content.active canvas:nth-of-type(2)",
+                position: "right"
+            },
+            {
+                title: "Control Parameters",
+                content: "Use these sliders to change device parameters like bias voltage, light intensity, and temperature. Watch how these changes affect the device behavior in real-time.",
+                target: ".experiment-content.active .control-panel",
+                position: "left"
+            },
+            {
+                title: "Current-Voltage Graph",
+                content: "This graph shows the current-voltage (I-V) characteristics of the device. As you adjust parameters, you'll see how the electrical response changes.",
+                target: ".experiment-content.active [id$='IvPlot']",
+                position: "left"
+            },
+            {
+                title: "Photodiode Mode",
+                content: "In photodiode mode, the device converts light into electrical current. Try applying reverse bias and increasing light intensity to see photocurrent generation.",
+                target: "button[onclick=\"switchExperimentTab(this, 'photodiode')\"]",
+                position: "bottom",
+                deviceSpecific: [
+                    {
+                        title: "Photodiode Bias",
+                        content: "Try applying a negative (reverse) bias to the photodiode. This creates a wider depletion region that improves light detection efficiency.",
+                        target: "#biasVoltage",
+                        position: "left"
+                    },
+                    {
+                        title: "Light Intensity Effect",
+                        content: "Increase the light intensity to see how photogenerated carriers create more current. The photocurrent is proportional to light intensity.",
+                        target: "#lightIntensity",
+                        position: "left"
+                    },
+                    {
+                        title: "Photodiode Applications",
+                        content: "Photodiodes are used in light sensors, optical communication, camera light meters, and medical equipment. They excel at converting light to electrical signals.",
+                        target: ".experiment-content.active canvas:first-of-type",
+                        position: "right"
+                    }
+                ]
+            },
+            {
+                title: "LED Mode",
+                content: "In LED mode, the device converts electrical current into light. Apply forward bias above the threshold voltage to see light emission.",
+                target: "button[onclick=\"switchExperimentTab(this, 'led')\"]",
+                position: "bottom",
+                deviceSpecific: [
+                    {
+                        title: "LED Forward Bias",
+                        content: "LEDs require forward bias (positive voltage) to operate. Try applying voltage above 0.6V to see light emission begin.",
+                        target: "#ledVoltage",
+                        position: "left"
+                    },
+                    {
+                        title: "Electroluminescence",
+                        content: "Watch how electrons and holes recombine in the junction to produce light. The color (wavelength) depends on the semiconductor bandgap.",
+                        target: ".experiment-content.active canvas:first-of-type",
+                        position: "right"
+                    },
+                    {
+                        title: "LED Applications",
+                        content: "LEDs are used in displays, lighting, indicators, and optical communication. They're energy-efficient and have long lifespans.",
+                        target: ".experiment-content.active canvas:first-of-type",
+                        position: "right"
+                    }
+                ]
+            },
+            {
+                title: "Solar Cell Mode",
+                content: "In solar cell mode, the device converts sunlight into electrical power. Adjust the illumination and load resistance to find the maximum power point.",
+                target: "button[onclick=\"switchExperimentTab(this, 'solar')\"]",
+                position: "bottom",
+                deviceSpecific: [
+                    {
+                        title: "Solar Illumination",
+                        content: "Adjust the sunlight intensity to see how it affects the generated current and power. Higher illumination produces more power.",
+                        target: "#solarIllumination",
+                        position: "left"
+                    },
+                    {
+                        title: "Load Resistance",
+                        content: "Change the load resistance to find the maximum power point. Too low or too high resistance reduces power output.",
+                        target: "#solarLoad",
+                        position: "left"
+                    },
+                    {
+                        title: "Solar Cell Parameters",
+                        content: "Notice key parameters like open-circuit voltage (Voc), short-circuit current (Isc), and fill factor. These determine solar cell efficiency.",
+                        target: ".experiment-content.active [id$='IvPlot']",
+                        position: "right"
+                    }
+                ]
+            },
+            {
+                title: "Challenge Section",
+                content: "Test your understanding with various challenges including multiple choice questions, calculations, and matching exercises.",
+                target: "button[onclick=\"switchExperimentTab(this, 'challenges')\"]",
+                position: "bottom"
+            },
+            {
+                title: "You're Ready!",
+                content: "You've completed the tour! Feel free to explore the simulation on your own. Click the help button anytime if you need assistance.",
+                target: ".floating-button.help",
+                position: "left"
+            }
+        ];
+
+        // Tour functions
+        function startGuidedTour() {
+            tourActive = true;
+            currentTourStep = 0;
+            document.getElementById('tourOverlay').classList.add('active');
+            document.getElementById('tourPopup').classList.add('active');
+            
+            if (helpPanelVisible) {
+                toggleHelp(); // Hide help panel if visible
+            }
+            
+            showTourStep();
+        }
+
+        function showTourStep() {
+            let step;
+            
+            if (inDeviceSpecificTour) {
+                step = deviceSpecificSteps[currentDeviceStep];
+                
+                // Update tour popup content for device-specific step
+                document.getElementById('tourStepNumber').textContent = `${currentTourStep + 1}.${currentDeviceStep + 1}`;
+                document.getElementById('tourTitle').textContent = step.title;
+                document.getElementById('tourContent').textContent = step.content;
+                
+                // Update progress within the main step
+                const mainStepProgress = ((currentTourStep + 1) / tourSteps.length) * 100;
+                const subStepIncrement = (1 / tourSteps.length) * (currentDeviceStep / deviceSpecificSteps.length) * 100;
+                document.getElementById('tourProgressBar').style.width = `${mainStepProgress + subStepIncrement}%`;
+            } else {
+                step = tourSteps[currentTourStep];
+                
+                // Update tour popup content
+                document.getElementById('tourStepNumber').textContent = currentTourStep + 1;
+                document.getElementById('tourTitle').textContent = step.title;
+                document.getElementById('tourContent').textContent = step.content;
+                
+                // Update progress bar
+                const progress = ((currentTourStep + 1) / tourSteps.length) * 100;
+                document.getElementById('tourProgressBar').style.width = `${progress}%`;
+                
+                // Check if this step has device-specific steps
+                if (step.deviceSpecific && step.deviceSpecific.length > 0) {
+                    deviceSpecificSteps = step.deviceSpecific;
+                }
+            }
+            
+            // Position spotlight and popup
+            positionTourElements(step);
+            
+            // Update navigation buttons
+            updateTourButtons();
+            
+            // If the step is about a specific tab, switch to that tab
+            if (!inDeviceSpecificTour && step.target && step.target.includes('switchExperimentTab')) {
+                const tabName = step.target.match(/'([^']+)'/)[1];
+                const tabButton = document.querySelector(`button[onclick*="${tabName}"]`);
+                switchExperimentTab(tabButton, tabName);
+            }
+        }
+
+        function updateTourButtons() {
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+            
+            if (inDeviceSpecificTour) {
+                prevButton.disabled = currentDeviceStep === 0 && currentTourStep === 0;
+                nextButton.textContent = currentDeviceStep === deviceSpecificSteps.length - 1 ? 'Continue Tour' : 'Next';
+            } else {
+                prevButton.disabled = currentTourStep === 0;
+                
+                if (currentTourStep === tourSteps.length - 1) {
+                    nextButton.textContent = 'Finish';
+                } else if (tourSteps[currentTourStep].deviceSpecific && tourSteps[currentTourStep].deviceSpecific.length > 0) {
+                    nextButton.textContent = 'Explore Device';
+                } else {
+                    nextButton.textContent = 'Next';
+                }
+            }
+        }
+
+        function positionTourElements(step) {
+            const targetElement = document.querySelector(step.target);
+            if (!targetElement) return;
+            
+            const spotlight = document.getElementById('tourSpotlight');
+            const popup = document.getElementById('tourPopup');
+            
+            // Position spotlight
+            const rect = targetElement.getBoundingClientRect();
+            spotlight.style.top = `${rect.top - 5}px`;
+            spotlight.style.left = `${rect.left - 5}px`;
+            spotlight.style.width = `${rect.width + 10}px`;
+            spotlight.style.height = `${rect.height + 10}px`;
+            
+            // Make sure the highlighted element is interactive
+            targetElement.style.position = "relative";
+            targetElement.style.zIndex = "1000";
+            
+            // Position popup based on specified position
+            const padding = 20;
+            switch (step.position) {
+                case 'top':
+                    popup.style.top = `${rect.top - popup.offsetHeight - padding}px`;
+                    popup.style.left = `${rect.left + rect.width/2 - popup.offsetWidth/2}px`;
+                    break;
+                case 'bottom':
+                    popup.style.top = `${rect.bottom + padding}px`;
+                    popup.style.left = `${rect.left + rect.width/2 - popup.offsetWidth/2}px`;
+                    break;
+                case 'left':
+                    popup.style.top = `${rect.top + rect.height/2 - popup.offsetHeight/2}px`;
+                    popup.style.left = `${rect.left - popup.offsetWidth - padding}px`;
+                    break;
+                case 'right':
+                    popup.style.top = `${rect.top + rect.height/2 - popup.offsetHeight/2}px`;
+                    popup.style.left = `${rect.right + padding}px`;
+                    break;
+            }
+            
+            // Ensure popup stays within viewport
+            const popupRect = popup.getBoundingClientRect();
+            if (popupRect.left < 20) {
+                popup.style.left = '20px';
+            }
+            if (popupRect.right > window.innerWidth - 20) {
+                popup.style.left = `${window.innerWidth - popup.offsetWidth - 20}px`;
+            }
+            if (popupRect.top < 20) {
+                popup.style.top = '20px';
+            }
+            if (popupRect.bottom > window.innerHeight - 20) {
+                popup.style.top = `${window.innerHeight - popup.offsetHeight - 20}px`;
+            }
+        }
+
+        function nextTourStep() {
+            if (inDeviceSpecificTour) {
+                if (currentDeviceStep < deviceSpecificSteps.length - 1) {
+                    // Move to next device-specific step
+                    currentDeviceStep++;
+                    showTourStep();
+                } else {
+                    // Exit device-specific tour and move to next main step
+                    inDeviceSpecificTour = false;
+                    currentDeviceStep = 0;
+                    deviceSpecificSteps = [];
+                    currentTourStep++;
+                    
+                    if (currentTourStep >= tourSteps.length) {
+                        endTour();
+                        return;
+                    }
+                    
+                    showTourStep();
+                }
+            } else {
+                if (currentTourStep < tourSteps.length - 1) {
+                    // Check if current step has device-specific steps
+                    const currentStep = tourSteps[currentTourStep];
+                    if (currentStep.deviceSpecific && currentStep.deviceSpecific.length > 0) {
+                        // Enter device-specific tour
+                        inDeviceSpecificTour = true;
+                        deviceSpecificSteps = currentStep.deviceSpecific;
+                        currentDeviceStep = 0;
+                        showTourStep();
+                    } else {
+                        // Move to next main step
+                        currentTourStep++;
+                        showTourStep();
+                    }
+                } else {
+                    endTour();
+                }
+            }
+        }
+
+        function prevTourStep() {
+            if (inDeviceSpecificTour) {
+                if (currentDeviceStep > 0) {
+                    // Move to previous device-specific step
+                    currentDeviceStep--;
+                    showTourStep();
+                } else {
+                    // Exit device-specific tour and go back to the main step
+                    inDeviceSpecificTour = false;
+                    showTourStep();
+                }
+            } else {
+                if (currentTourStep > 0) {
+                    currentTourStep--;
+                    
+                    // Check if previous step had device-specific steps
+                    const prevStep = tourSteps[currentTourStep];
+                    if (prevStep.deviceSpecific && prevStep.deviceSpecific.length > 0) {
+                        // We came from device-specific tour, so just show the main step now
+                        deviceSpecificSteps = prevStep.deviceSpecific;
+                    }
+                    
+                    showTourStep();
+                }
+            }
+        }
+
+        function skipTour() {
+            if (confirm('Are you sure you want to skip the tour? You can restart it anytime from the help menu.')) {
+                endTour();
+            }
+        }
+
+        function endTour() {
+            tourActive = false;
+            document.getElementById('tourOverlay').classList.remove('active');
+            document.getElementById('tourPopup').classList.remove('active');
+            
+            // Reset any highlighted elements to ensure they're interactive after tour
+            const highlightedElements = document.querySelectorAll('[style*="z-index: 1000"]');
+            highlightedElements.forEach(element => {
+                if (element.style.zIndex === "1000") {
+                    element.style.zIndex = "";
+                }
+                if (element.style.position === "relative") {
+                    element.style.position = "";
+                }
+            });
+        }
+
+        function toggleHelp() {
+            helpPanelVisible = !helpPanelVisible;
+            const helpPanel = document.getElementById('helpPanel');
+            
+            if (helpPanelVisible) {
+                helpPanel.classList.add('active');
+                if (tourActive) {
+                    endTour(); // End tour if help is opened
+                }
+            } else {
+                helpPanel.classList.remove('active');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvases('photodiode');
+            setupEventListeners();
+            initializePlotly('ivPlot');
+            updateSimulation();
+            startAnimation();
+            initializeChallenges();
+            
+            // Auto-start the guided tour without popup confirmation
+            setTimeout(() => {
+                startGuidedTour();
+            }, 1000);
+        });
+
+        // Comprehensive question bank for challenges
+        const questionBankFull = {
+            mcq: [
+                {
+                    question: "Which of the following devices converts light energy to electrical energy?",
+                    options: ["LED", "Photodiode", "Transistor", "Resistor"],
+                    answer: "Photodiode",
+                    explanation: "Photodiodes operate on the principle of the photovoltaic effect, converting light energy into electrical energy. When light strikes the p-n junction, it generates electron-hole pairs, creating a current.",
+                    hint: "Think about which device would produce electricity when exposed to light."
+                },
+                {
+                    question: "What is the primary material used in red LEDs?",
+                    options: ["Silicon", "Germanium", "Gallium Arsenide Phosphide", "Gallium Nitride"],
+                    answer: "Gallium Arsenide Phosphide",
+                    explanation: "Red LEDs are typically made from Gallium Arsenide Phosphide (GaAsP) or Aluminum Gallium Arsenide (AlGaAs). The bandgap of these materials corresponds to the energy of red light.",
+                    hint: "Different LED colors require different semiconductor materials with specific bandgap energies."
+                },
+                {
+                    question: "What happens to the depletion region width when a photodiode is reverse biased?",
+                    options: ["It decreases", "It increases", "It remains the same", "It disappears completely"],
+                    answer: "It increases",
+                    explanation: "When reverse bias is applied to a photodiode, the depletion region width increases. This wider depletion region improves the device's efficiency by increasing the volume where photons can generate electron-hole pairs.",
+                    hint: "Reverse bias pulls charge carriers away from the junction."
+                },
+                {
+                    question: "Which parameter is most important for solar cell efficiency?",
+                    options: ["Fill Factor", "Temperature coefficient", "Dopant concentration", "Thickness"],
+                    answer: "Fill Factor",
+                    explanation: "Fill Factor is a critical parameter for solar cell efficiency. It's the ratio of maximum power to the product of open-circuit voltage and short-circuit current, indicating how closely the solar cell performs to its ideal capability.",
+                    hint: "This parameter measures how 'rectangular' the I-V curve of a solar cell is."
+                },
+                {
+                    question: "Which of the following affects the wavelength of light emitted by an LED?",
+                    options: ["The applied current", "The semiconductor bandgap", "The physical size of the LED", "The ambient temperature"],
+                    answer: "The semiconductor bandgap",
+                    explanation: "The wavelength of light emitted by an LED is primarily determined by the bandgap energy of the semiconductor material used. Materials with larger bandgaps emit shorter wavelengths (bluer light).",
+                    hint: "The energy of emitted photons is related to the energy difference between electron and hole states."
+                },
+                {
+                    question: "What principle explains the operation of a photodiode?",
+                    options: ["Photovoltaic effect", "Thermoelectric effect", "Piezoelectric effect", "Hall effect"],
+                    answer: "Photovoltaic effect",
+                    explanation: "The photovoltaic effect is the generation of voltage or electric current in a material upon exposure to light. In photodiodes, incident photons with sufficient energy create electron-hole pairs, which are separated by the built-in electric field at the p-n junction.",
+                    hint: "This is the same effect that enables solar cells to convert sunlight to electricity."
+                },
+                {
+                    question: "Why are GaN-based LEDs more efficient than earlier LED technologies?",
+                    options: ["Higher bandgap energy", "Better thermal conductivity", "Improved electron mobility", "Lower defect density"],
+                    answer: "Higher bandgap energy",
+                    explanation: "GaN has a direct bandgap of about 3.4 eV, enabling efficient blue and ultraviolet emission. The higher bandgap energy allows for more efficient recombination processes and less thermal losses compared to indirect bandgap materials.",
+                    hint: "The bandgap energy affects both the wavelength emitted and the efficiency of the emission process."
+                },
+                {
+                    question: "What is the purpose of the anti-reflection coating on solar cells?",
+                    options: ["To reduce surface reflection losses", "To protect from environmental damage", "To improve carrier mobility", "To enhance doping concentration"],
+                    answer: "To reduce surface reflection losses",
+                    explanation: "Solar cells have anti-reflection coatings to minimize the amount of sunlight reflected from their surface. This increases the amount of light absorbed by the cell, improving efficiency by up to 10%.",
+                    hint: "Bare silicon can reflect more than 30% of incident light."
+                },
+                {
+                    question: "Which of these best describes the principle of operation for an LED?",
+                    options: ["Spontaneous emission", "Stimulated emission", "Photoelectric effect", "Compton scattering"],
+                    answer: "Spontaneous emission",
+                    explanation: "LEDs operate based on spontaneous emission, where electrons in the conduction band spontaneously recombine with holes in the valence band, releasing energy in the form of photons. This differs from stimulated emission used in lasers.",
+                    hint: "This type of emission occurs randomly without external stimulus, unlike what happens in lasers."
+                },
+                {
+                    question: "What is the typical response time of a PIN photodiode compared to a standard PN junction photodiode?",
+                    options: ["Faster", "Slower", "About the same", "Depends on the wavelength"],
+                    answer: "Faster",
+                    explanation: "PIN photodiodes have an intrinsic (undoped) layer between the P and N regions, which widens the depletion region. This results in lower junction capacitance and faster response times compared to standard PN junction photodiodes.",
+                    hint: "The added intrinsic layer affects the transit time of carriers and the junction capacitance."
+                }
+            ],
+            fillBlanks: [
+                {
+                    text: "In a photodiode, the current generated is __________ proportional to the incident light intensity, and the depletion region width __________ when reverse bias is applied.",
+                    blanks: ["directly", "increases"],
+                    explanation: "In photodiodes, the photocurrent is directly proportional to the incident light intensity, following a linear relationship. When reverse bias is applied, the electric field across the junction increases, widening the depletion region.",
+                    hint: "The relationship between current and light follows a simple mathematical relationship, and reverse bias affects the space charge region size."
+                },
+                {
+                    text: "LEDs emit light when electrons and holes __________ at the junction, and the color of the light depends on the __________ of the semiconductor material.",
+                    blanks: ["recombine", "bandgap"],
+                    explanation: "In LEDs, light is emitted when electrons and holes recombine at the junction, releasing energy in the form of photons. The wavelength (color) of this light is determined by the bandgap of the semiconductor material.",
+                    hint: "The process involves carriers from opposite bands meeting, and the energy difference determines photon energy."
+                },
+                {
+                    text: "The open-circuit voltage (Voc) of a solar cell decreases as __________ increases, while the short-circuit current (Isc) __________ with increasing light intensity.",
+                    blanks: ["temperature", "increases"],
+                    explanation: "The open-circuit voltage of a solar cell decreases as temperature increases, typically by about 2.2 mV/°C for silicon cells. Conversely, the short-circuit current increases roughly linearly with increasing light intensity.",
+                    hint: "Heat affects semiconductor behavior negatively, while more photons means more potential current carriers."
+                },
+                {
+                    text: "The responsivity of a photodiode is highest at wavelengths __________ the bandgap energy of the semiconductor, and photodiodes made from __________ can detect infrared wavelengths better than those made from silicon.",
+                    blanks: ["near", "germanium"],
+                    explanation: "Photodiode responsivity peaks at wavelengths corresponding to energies near the bandgap energy of the semiconductor. Germanium, with its smaller bandgap (0.67 eV vs. 1.12 eV for silicon), can detect longer infrared wavelengths that silicon cannot efficiently detect.",
+                    hint: "The ideal photon energy is just above the minimum needed for absorption, and materials with smaller bandgaps detect longer wavelengths."
+                },
+                {
+                    text: "In an LED, the forward voltage drop is approximately equal to the __________ energy of the semiconductor divided by the elementary charge, and the emission spectrum width __________ as the temperature increases.",
+                    blanks: ["bandgap", "increases"],
+                    explanation: "The forward voltage of an LED is approximately equal to the bandgap energy divided by the elementary charge (Vf ≈ Eg/e). As temperature increases, the emission spectrum broadens due to increased thermal distribution of carrier energies.",
+                    hint: "The minimum energy needed to push carriers across the junction relates to material properties, and heat causes more variation in carrier energies."
+                },
+                {
+                    text: "Multi-junction solar cells achieve higher efficiencies by using materials with __________ bandgap energies to absorb __________ portions of the solar spectrum.",
+                    blanks: ["different", "different"],
+                    explanation: "Multi-junction solar cells stack materials with different bandgap energies, allowing each layer to efficiently absorb different portions of the solar spectrum. This approach minimizes thermalization losses and can achieve efficiencies over 45%.",
+                    hint: "One material can't efficiently convert all wavelengths of light to electricity due to the Shockley-Queisser limit."
+                }
+            ],
+            matching: [
+                {
+                    left: "Photodiode",
+                    right: "Converts light to current",
+                    explanation: "Photodiodes generate electrical current when exposed to light through the photovoltaic effect."
+                },
+                {
+                    left: "LED",
+                    right: "Converts current to light",
+                    explanation: "Light Emitting Diodes produce light when current flows through the p-n junction, causing electron-hole recombination."
+                },
+                {
+                    left: "Solar Cell",
+                    right: "Generates power from sunlight",
+                    explanation: "Solar cells are specialized photodiodes designed to efficiently convert sunlight into usable electrical power."
+                },
+                {
+                    left: "Forward Bias",
+                    right: "Reduces barrier potential",
+                    explanation: "Forward biasing a p-n junction lowers the potential barrier, allowing for increased current flow."
+                },
+                {
+                    left: "Reverse Bias",
+                    right: "Increases depletion width",
+                    explanation: "Reverse biasing a p-n junction widens the depletion region, reducing current flow but increasing breakdown voltage."
+                },
+                {
+                    left: "Avalanche Photodiode",
+                    right: "Uses internal gain",
+                    explanation: "Avalanche photodiodes operate with high reverse bias, creating an internal amplification through impact ionization."
+                },
+                {
+                    left: "Quantum Efficiency",
+                    right: "Photons to carriers ratio",
+                    explanation: "Quantum efficiency measures how effectively a device converts incident photons to collected charge carriers."
+                },
+                {
+                    left: "Responsivity",
+                    right: "Current per watt of light",
+                    explanation: "Responsivity quantifies a photodetector's electrical output per optical input power, typically measured in A/W."
+                }
+            ],
+            advanced: [
+                {
+                    question: "What effect explains why the efficiency of LEDs decreases at high current levels?",
+                    options: ["Auger recombination", "Dopant saturation", "Thermal expansion", "Bandgap narrowing"],
+                    answer: "Auger recombination",
+                    explanation: "At high current densities, Auger recombination becomes significant in LEDs. This is a non-radiative process where the energy released during recombination is transferred to another carrier instead of producing a photon, reducing efficiency.",
+                    hint: "This non-radiative process involves three carriers, where energy is transferred to a third carrier instead of emitting a photon."
+                },
+                {
+                    question: "Which of these factors most significantly affects the spectral response of a photodiode?",
+                    options: ["Absorption coefficient of the material", "Operating temperature", "Doping concentration", "Device geometry"],
+                    answer: "Absorption coefficient of the material",
+                    explanation: "The absorption coefficient of the semiconductor material determines which wavelengths of light are absorbed at different depths within the device, directly affecting the spectral response of a photodiode.",
+                    hint: "This material property varies with wavelength and determines how deeply light penetrates before being absorbed."
+                },
+                {
+                    question: "What limits the theoretical maximum efficiency of a single-junction silicon solar cell?",
+                    options: ["Shockley-Queisser limit", "Boltzmann distribution", "Fermi-Dirac statistics", "Debye length"],
+                    answer: "Shockley-Queisser limit",
+                    explanation: "The Shockley-Queisser limit sets the theoretical maximum efficiency for single-junction solar cells (about 33% for silicon). This limit accounts for spectrum losses, recombination losses, and other fundamental physical constraints.",
+                    hint: "This theoretical limit is named after the scientists who first calculated it and considers fundamental thermodynamic constraints."
+                },
+                {
+                    question: "What phenomenon is responsible for the 'droop' in efficiency observed in InGaN-based blue LEDs at high current densities?",
+                    options: ["Electron leakage", "Polarization fields", "Surface recombination", "Joule heating"],
+                    answer: "Electron leakage",
+                    explanation: "Electron leakage occurs when electrons pass through the active region without recombining with holes, reducing efficiency. In InGaN LEDs, this becomes more severe at high current densities due to the limited hole concentration and mobility in the p-type layers.",
+                    hint: "This involves carriers passing through the active region without contributing to light emission."
+                },
+                {
+                    question: "Which technique is used to reduce the dislocation density in GaN-based LEDs grown on sapphire substrates?",
+                    options: ["Epitaxial Lateral Overgrowth (ELO)", "Molecular Beam Epitaxy (MBE)", "Metal-Organic Chemical Vapor Deposition (MOCVD)", "Liquid Phase Epitaxy (LPE)"],
+                    answer: "Epitaxial Lateral Overgrowth (ELO)",
+                    explanation: "Epitaxial Lateral Overgrowth (ELO) reduces dislocation density by masking portions of the substrate with SiO2 or SiN, then growing GaN laterally over these masks. This confines many of the dislocations to regions directly above the substrate and produces high-quality material in the laterally grown regions.",
+                    hint: "This technique involves selective growth and lateral expansion to reduce defect propagation."
+                },
+                {
+                    question: "What is the primary advantage of using perovskite materials in solar cells?",
+                    options: ["High absorption coefficient", "Low manufacturing cost", "High stability", "Low toxicity"],
+                    answer: "High absorption coefficient",
+                    explanation: "Perovskite materials have exceptionally high absorption coefficients (10^4-10^5 cm^-1), allowing them to absorb the same amount of light with much thinner layers than silicon. This property, combined with their low-cost synthesis and tunable bandgap, has led to rapid efficiency improvements in perovskite solar cells.",
+                    hint: "This property allows the material to efficiently capture light with very thin layers."
+                }
+            ],
+            calculation: [
+                {
+                    question: "If a photodiode has a responsivity of 0.5 A/W at 850 nm, what current will it produce when illuminated with 2 mW of light at this wavelength?",
+                    answer: "1",
+                    unit: "mA",
+                    explanation: "Current = Responsivity × Power = 0.5 A/W × 2 mW = 1 mA",
+                    hint: "Use the definition of responsivity: I = R × P, where R is responsivity and P is optical power."
+                },
+                {
+                    question: "A solar cell has an open-circuit voltage of 0.6V and a short-circuit current of 200mA. If its fill factor is 0.75, what is its maximum power output?",
+                    answer: "90",
+                    unit: "mW",
+                    explanation: "Maximum Power = Voc × Isc × Fill Factor = 0.6V × 200mA × 0.75 = 90mW",
+                    hint: "The fill factor relates the theoretical maximum power (Voc × Isc) to the actual maximum power."
+                },
+                {
+                    question: "An LED with a forward voltage of 1.8V passes a current of 15mA. If its optical efficiency is 30%, what is its optical power output?",
+                    answer: "8.1",
+                    unit: "mW",
+                    explanation: "Electrical Power = V × I = 1.8V × 15mA = 27mW. Optical Power = Electrical Power × Efficiency = 27mW × 0.3 = 8.1mW",
+                    hint: "First calculate the electrical power input, then multiply by the efficiency to find optical output."
+                },
+                {
+                    question: "A photodiode has a quantum efficiency of 80% at 600 nm. What is its responsivity at this wavelength? (h = 6.63×10^-34 J·s, c = 3×10^8 m/s, e = 1.6×10^-19 C)",
+                    answer: "0.386",
+                    unit: "A/W",
+                    explanation: "Responsivity = (QE × λ × e) / (h × c) = (0.8 × 600×10^-9 × 1.6×10^-19) / (6.63×10^-34 × 3×10^8) = 0.386 A/W",
+                    hint: "Use the relationship between quantum efficiency (QE) and responsivity: R = (QE × λ × e) / (h × c)"
+                },
+                {
+                    question: "A silicon photodiode with area 1 mm² has a dark current of 2 nA. If its noise equivalent power (NEP) is 10^-14 W/√Hz at 1 kHz bandwidth, what is its detectivity (D*)?",
+                    answer: "10^12",
+                    unit: "cm·√Hz/W",
+                    explanation: "D* = √A / NEP = √(10^-2 cm²) / (10^-14 W/√Hz) = 10^12 cm·√Hz/W",
+                    hint: "Detectivity D* is calculated as D* = √A / NEP, where A is the detector area in cm²."
+                },
+                {
+                    question: "A multi-junction solar cell has three layers with bandgaps of 1.9 eV, 1.4 eV, and 0.7 eV. What is the longest wavelength of light (in nm) this cell can theoretically convert to electricity? (h = 6.63×10^-34 J·s, c = 3×10^8 m/s, e = 1.6×10^-19 C)",
+                    answer: "1771",
+                    unit: "nm",
+                    explanation: "λ = hc/E = (6.63×10^-34 × 3×10^8) / (0.7 × 1.6×10^-19) = 1.771×10^-6 m = 1771 nm",
+                    hint: "The longest wavelength corresponds to the smallest bandgap. Use λ = hc/E where E is the bandgap energy in joules."
+                }
+            ]
+        };
+        
+        // Active question bank for the current session
+        let questionBank = {
+            mcq: [],
+            fillBlanks: [],
+            matching: [],
+            advanced: [],
+            calculation: []
+        };
+
+        // Challenge system functions
+        function initializeChallenges() {
+            // Randomly select questions from the full question bank
+            selectRandomQuestions();
+            
+            // Initialize question answer arrays
+            challengeAnswers.mcq = Array(questionBank.mcq.length).fill(null);
+            challengeAnswers.fillBlanks = Array(questionBank.fillBlanks.length).fill(null).map(() => []);
+            challengeAnswers.matching = {};
+            challengeAnswers.advanced = Array(questionBank.advanced.length).fill(null);
+            challengeAnswers.calculation = Array(questionBank.calculation.length).fill(null);
+            
+            // Generate challenge content
+            generateMCQContent();
+            generateFillBlanksContent();
+            generateMatchingContent();
+            generateAdvancedContent();
+            generateCalculationContent();
+            
+            // Update stats display
+            updateChallengeStats();
+            
+            // Store question-specific hints
+            storeQuestionHints();
+        }
+        
+        function selectRandomQuestions() {
+            // MCQ - Select 5 random questions
+            questionBank.mcq = shuffleArray(questionBankFull.mcq).slice(0, 5);
+            
+            // Fill in the blanks - Select 3 random questions
+            questionBank.fillBlanks = shuffleArray(questionBankFull.fillBlanks).slice(0, 3);
+            
+            // Matching - Select 5 random pairs
+            questionBank.matching = shuffleArray(questionBankFull.matching).slice(0, 5);
+            
+            // Advanced - Select 3 random questions
+            questionBank.advanced = shuffleArray(questionBankFull.advanced).slice(0, 3);
+            
+            // Calculation - Select 3 random questions
+            questionBank.calculation = shuffleArray(questionBankFull.calculation).slice(0, 3);
+        }
+        
+        function shuffleArray(array) {
+            // Create a copy of the array to avoid modifying the original
+            const newArray = [...array];
+            
+            // Fisher-Yates shuffle algorithm
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            
+            return newArray;
+        }
+        
+        function storeQuestionHints() {
+            // Store question-specific hints for later use
+            currentQuestionHints = {
+                mcq: {},
+                fillBlanks: {},
+                advanced: {},
+                calculation: {}
+            };
+            
+            // Store MCQ question hints
+            questionBank.mcq.forEach((q, idx) => {
+                currentQuestionHints.mcq[idx] = q.hint || "";
+            });
+            
+            // Store fill-in-the-blanks question hints
+            questionBank.fillBlanks.forEach((q, idx) => {
+                currentQuestionHints.fillBlanks[idx] = q.hint || "";
+            });
+            
+            // Store advanced question hints
+            questionBank.advanced.forEach((q, idx) => {
+                currentQuestionHints.advanced[idx] = q.hint || "";
+            });
+            
+            // Store calculation question hints
+            questionBank.calculation.forEach((q, idx) => {
+                currentQuestionHints.calculation[idx] = q.hint || "";
+            });
+        }
+
+        function generateMCQContent() {
+            const contentDiv = document.getElementById('mcqContent');
+            let html = '';
+            
+            questionBank.mcq.forEach((q, idx) => {
+                html += `
+                    <div class="quiz-question">
+                        <h4>${idx + 1}. ${q.question}</h4>
+                        <div class="quiz-options">
+                            ${q.options.map((opt, optIdx) => `
+                                <div class="quiz-option" onclick="selectQuizAnswer(1, ${idx}, '${opt}', this)">
+                                    ${opt}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="explanation-panel" id="mcqExplanation${idx}">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+        }
+
+        function generateFillBlanksContent() {
+            const contentDiv = document.getElementById('fillBlanksContent');
+            let html = '';
+            
+            questionBank.fillBlanks.forEach((q, idx) => {
+                let text = q.text;
+                let blankCount = 0;
+                
+                // Replace blanks with input fields
+                text = text.replace(/________/g, () => {
+                    return `<input type="text" class="fill-blank-input" id="blank${idx}_${blankCount++}" placeholder="Enter answer">`;
+                });
+                
+                html += `
+                    <div class="fill-blank-container">
+                        <h4>Question ${idx + 1}</h4>
+                        <div class="fill-blank-text">${text}</div>
+                        <div class="explanation-panel" id="fillBlankExplanation${idx}">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+            
+            // Add event listeners to the input fields
+            questionBank.fillBlanks.forEach((q, qIdx) => {
+                q.blanks.forEach((_, bIdx) => {
+                    const input = document.getElementById(`blank${qIdx}_${bIdx}`);
+                    if (input) {
+                        input.addEventListener('change', function() {
+                            if (!challengeAnswers.fillBlanks[qIdx]) {
+                                challengeAnswers.fillBlanks[qIdx] = [];
+                            }
+                            challengeAnswers.fillBlanks[qIdx][bIdx] = this.value.trim().toLowerCase();
+                        });
+                    }
+                });
+            });
+        }
+
+        function generateMatchingContent() {
+            const contentDiv = document.getElementById('matchingContent');
+            let html = `
+                <div class="matching-container">
+                    <div class="matching-column" id="matchingLeft">
+                        ${questionBank.matching.map((item, idx) => `
+                            <div class="matching-item" data-idx="${idx}" data-side="left" onclick="selectMatchingItem(this)">
+                                ${item.left}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="matching-connections" id="matchingConnections"></div>
+                    <div class="matching-column" id="matchingRight">
+                        ${questionBank.matching.map((item, idx) => `
+                            <div class="matching-item" data-idx="${idx}" data-side="right" onclick="selectMatchingItem(this)">
+                                ${item.right}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+        }
+
+        function generateAdvancedContent() {
+            const contentDiv = document.getElementById('advancedContent');
+            let html = '';
+            
+            questionBank.advanced.forEach((q, idx) => {
+                html += `
+                    <div class="quiz-question">
+                        <h4>${idx + 1}. ${q.question}</h4>
+                        <div class="quiz-options">
+                            ${q.options.map((opt, optIdx) => `
+                                <div class="quiz-option" onclick="selectAdvancedAnswer(${idx}, '${opt}', this)">
+                                    ${opt}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="explanation-panel" id="advancedExplanation${idx}">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+        }
+
+        function generateCalculationContent() {
+            const contentDiv = document.getElementById('calculationContent');
+            let html = '';
+            
+            questionBank.calculation.forEach((q, idx) => {
+                html += `
+                    <div class="quiz-question">
+                        <h4>${idx + 1}. ${q.question}</h4>
+                        <div style="margin-top: 10px;">
+                            <input type="number" step="0.01" class="fill-blank-input" id="calc${idx}" placeholder="Enter value"> 
+                            <span style="font-weight: 600;">${q.unit}</span>
+                        </div>
+                        <div class="explanation-panel" id="calcExplanation${idx}">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+            
+            // Add event listeners to the input fields
+            questionBank.calculation.forEach((_, idx) => {
+                const input = document.getElementById(`calc${idx}`);
+                if (input) {
+                    input.addEventListener('change', function() {
+                        challengeAnswers.calculation[idx] = parseFloat(this.value);
+                    });
+                }
+            });
+        }
+
+        function selectQuizAnswer(challengeNum, questionNum, answer, element) {
+            // Update answer in the tracking array
+            challengeAnswers.mcq[questionNum] = answer;
+            
+            // Update UI to show selected answer
+            const questionContainer = element.closest('.quiz-question');
+            const options = questionContainer.querySelectorAll('.quiz-option');
+            
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+        }
+
+        function selectAdvancedAnswer(questionNum, answer, element) {
+            // Update answer in the tracking array
+            challengeAnswers.advanced[questionNum] = answer;
+            
+            // Update UI to show selected answer
+            const questionContainer = element.closest('.quiz-question');
+            const options = questionContainer.querySelectorAll('.quiz-option');
+            
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+        }
+
+        let selectedMatchingItems = [];
+        let connectionLines = {};
+        let currentConnectionId = 0;
+        
+        function selectMatchingItem(element) {
+            // If already matched, don't allow selection
+            if (element.classList.contains('matched')) {
+                return;
+            }
+            
+            // Toggle selection
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedMatchingItems = selectedMatchingItems.filter(item => item !== element);
+                return;
+            }
+            
+            // Add to selected items
+            element.classList.add('selected');
+            selectedMatchingItems.push(element);
+            
+            // If we have two items selected, create a pair
+            if (selectedMatchingItems.length === 2) {
+                const item1 = selectedMatchingItems[0];
+                const item2 = selectedMatchingItems[1];
+                
+                // Check if they're from different columns
+                if (item1.getAttribute('data-side') !== item2.getAttribute('data-side')) {
+                    createMatchingPair(item1, item2);
+                }
+                
+                // Clear selections
+                selectedMatchingItems.forEach(item => {
+                    item.classList.remove('selected');
+                });
+                selectedMatchingItems = [];
+            }
+        }
+        
+        function createMatchingPair(item1, item2) {
+            // Ensure left is always the first item
+            let leftItem, rightItem;
+            if (item1.getAttribute('data-side') === 'left') {
+                leftItem = item1;
+                rightItem = item2;
+            } else {
+                leftItem = item2;
+                rightItem = item1;
+            }
+            
+            // Store the connection in our tracking object
+            const leftIdx = parseInt(leftItem.getAttribute('data-idx'));
+            const rightIdx = parseInt(rightItem.getAttribute('data-idx'));
+            
+            const connectionId = currentConnectionId++;
+            connectionLines[connectionId] = { leftIdx, rightIdx };
+            
+            // Update UI
+            leftItem.classList.add('matched');
+            rightItem.classList.add('matched');
+            
+            // Create a connection line
+            drawConnectionLine(leftItem, rightItem, connectionId);
+            
+            // Update the answers object
+            challengeAnswers.matching[leftIdx] = rightIdx;
+            
+            // Add event listener to remove pair on click
+            leftItem.addEventListener('click', () => removePair(connectionId));
+            rightItem.addEventListener('click', () => removePair(connectionId));
+        }
+        
+        function drawConnectionLine(leftItem, rightItem, connectionId) {
+            const leftRect = leftItem.getBoundingClientRect();
+            const rightRect = rightItem.getBoundingClientRect();
+            const connectionsContainer = document.getElementById('matchingConnections');
+            const containerRect = connectionsContainer.getBoundingClientRect();
+            
+            // Calculate positions relative to the connections container
+            const startX = leftRect.right - containerRect.left;
+            const startY = leftRect.top + leftRect.height/2 - containerRect.top;
+            const endX = rightRect.left - containerRect.left;
+            const endY = rightRect.top + rightRect.height/2 - containerRect.top;
+            
+            // Create the line
+            const line = document.createElement('div');
+            line.id = `connection-${connectionId}`;
+            line.className = 'connection-line';
+            
+            // Calculate line length and angle
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            
+            // Position and rotate the line
+            line.style.width = `${length}px`;
+            line.style.left = `${startX}px`;
+            line.style.top = `${startY}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            // Add to container
+            connectionsContainer.appendChild(line);
+        }
+        
+        function removePair(connectionId) {
+            // Get the connection details
+            const connection = connectionLines[connectionId];
+            if (!connection) return;
+            
+            // Remove the connection line
+            const line = document.getElementById(`connection-${connectionId}`);
+            if (line) line.remove();
+            
+            // Get the items
+            const leftItem = document.querySelector(`.matching-item[data-side="left"][data-idx="${connection.leftIdx}"]`);
+            const rightItem = document.querySelector(`.matching-item[data-side="right"][data-idx="${connection.rightIdx}"]`);
+            
+            // Update UI
+            if (leftItem) leftItem.classList.remove('matched', 'correct-match', 'incorrect-match');
+            if (rightItem) rightItem.classList.remove('matched', 'correct-match', 'incorrect-match');
+            
+            // Remove from tracking objects
+            delete connectionLines[connectionId];
+            delete challengeAnswers.matching[connection.leftIdx];
+        }
+
+        function checkQuizAnswers(challengeNum) {
+            let correctCount = 0;
+            let totalQuestions = questionBank.mcq.length;
+            
+            // Check each answer
+            questionBank.mcq.forEach((q, idx) => {
+                const answer = challengeAnswers.mcq[idx];
+                const questionContainer = document.querySelector(`#mcqContent .quiz-question:nth-child(${idx + 1})`);
+                const options = questionContainer.querySelectorAll('.quiz-option');
+                const explanation = document.getElementById(`mcqExplanation${idx}`);
+                
+                // Mark correct and incorrect answers
+                options.forEach(opt => {
+                    if (opt.textContent.trim() === q.answer) {
+                        opt.classList.add('correct');
+                    } else if (opt.textContent.trim() === answer && answer !== q.answer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                // Show explanation
+                if (explanation) {
+                    explanation.classList.add('active');
+                }
+                
+                // Count correct answers
+                if (answer === q.answer) {
+                    correctCount++;
+                }
+            });
+            
+            // Calculate score (5 points per correct answer)
+            const score = correctCount * 5;
+            
+            // Update feedback
+            const feedback = document.getElementById('challenge1Feedback');
+            if (feedback) {
+                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
+            }
+            
+            // If all correct, mark challenge as completed
+            if (correctCount === totalQuestions && !challengeStates[challengeNum]) {
+                markChallengeComplete(challengeNum, score);
+            }
+        }
+
+        function checkFillBlanks() {
+            let correctCount = 0;
+            let totalBlanks = 0;
+            
+            // Check each answer
+            questionBank.fillBlanks.forEach((q, qIdx) => {
+                q.blanks.forEach((correctAnswer, bIdx) => {
+                    totalBlanks++;
+                    
+                    const userAnswer = challengeAnswers.fillBlanks[qIdx] ? 
+                                      (challengeAnswers.fillBlanks[qIdx][bIdx] || '').toLowerCase() : '';
+                    const inputField = document.getElementById(`blank${qIdx}_${bIdx}`);
+                    const explanation = document.getElementById(`fillBlankExplanation${qIdx}`);
+                    
+                    // Mark correct or incorrect
+                    if (inputField) {
+                        if (userAnswer === correctAnswer.toLowerCase()) {
+                            inputField.classList.add('correct');
+                            inputField.classList.remove('incorrect');
+                            correctCount++;
+                        } else {
+                            inputField.classList.add('incorrect');
+                            inputField.classList.remove('correct');
+                        }
+                    }
+                    
+                    // Show explanation
+                    if (explanation) {
+                        explanation.classList.add('active');
+                    }
+                });
+            });
+            
+            // Calculate score (5 points per correct blank)
+            const score = correctCount * 5;
+            
+            // Update feedback
+            const feedback = document.getElementById('challenge2Feedback');
+            if (feedback) {
+                feedback.innerHTML = `You got ${correctCount} out of ${totalBlanks} blanks correct! Score: ${score} points`;
+                feedback.className = 'challenge-feedback ' + (correctCount === totalBlanks ? 'success' : 'error');
+            }
+            
+            // If all correct, mark challenge as completed
+            if (correctCount === totalBlanks && !challengeStates[2]) {
+                markChallengeComplete(2, score);
+            }
+        }
+
+        function checkMatching() {
+            let correctCount = 0;
+            const totalPairs = questionBank.matching.length;
+            
+            // Check each pair
+            Object.entries(challengeAnswers.matching).forEach(([leftIdx, rightIdx]) => {
+                leftIdx = parseInt(leftIdx);
+                rightIdx = parseInt(rightIdx);
+                
+                const leftItem = document.querySelector(`.matching-item[data-side="left"][data-idx="${leftIdx}"]`);
+                const rightItem = document.querySelector(`.matching-item[data-side="right"][data-idx="${rightIdx}"]`);
+                
+                // Check if the match is correct
+                const isCorrect = leftIdx === rightIdx;
+                
+                // Update UI
+                if (leftItem) leftItem.classList.add(isCorrect ? 'correct-match' : 'incorrect-match');
+                if (rightItem) rightItem.classList.add(isCorrect ? 'correct-match' : 'incorrect-match');
+                
+                // Count correct answers
+                if (isCorrect) {
+                    correctCount++;
+                }
+            });
+            
+            // Calculate score (5 points per correct pair)
+            const score = correctCount * 5;
+            
+            // Update feedback
+            const feedback = document.getElementById('challenge3Feedback');
+            if (feedback) {
+                feedback.innerHTML = `You matched ${correctCount} out of ${totalPairs} pairs correctly! Score: ${score} points`;
+                feedback.className = 'challenge-feedback ' + (correctCount === totalPairs ? 'success' : 'error');
+            }
+            
+            // If all correct, mark challenge as completed
+            if (correctCount === totalPairs && !challengeStates[3]) {
+                markChallengeComplete(3, score);
+            }
+        }
+
+        function checkAdvancedAnswers() {
+            let correctCount = 0;
+            let totalQuestions = questionBank.advanced.length;
+            
+            // Check each answer
+            questionBank.advanced.forEach((q, idx) => {
+                const answer = challengeAnswers.advanced[idx];
+                const questionContainer = document.querySelector(`#advancedContent .quiz-question:nth-child(${idx + 1})`);
+                const options = questionContainer.querySelectorAll('.quiz-option');
+                const explanation = document.getElementById(`advancedExplanation${idx}`);
+                
+                // Mark correct and incorrect answers
+                options.forEach(opt => {
+                    if (opt.textContent.trim() === q.answer) {
+                        opt.classList.add('correct');
+                    } else if (opt.textContent.trim() === answer && answer !== q.answer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                // Show explanation
+                if (explanation) {
+                    explanation.classList.add('active');
+                }
+                
+                // Count correct answers
+                if (answer === q.answer) {
+                    correctCount++;
+                }
+            });
+            
+            // Calculate score (10 points per correct answer for advanced questions)
+            const score = correctCount * 10;
+            
+            // Update feedback
+            const feedback = document.getElementById('challenge4Feedback');
+            if (feedback) {
+                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
+            }
+            
+            // If all correct, mark challenge as completed
+            if (correctCount === totalQuestions && !challengeStates[4]) {
+                markChallengeComplete(4, score);
+            }
+        }
+
+        function checkCalculations() {
+            let correctCount = 0;
+            let totalQuestions = questionBank.calculation.length;
+            
+            // Check each answer
+            questionBank.calculation.forEach((q, idx) => {
+                const userAnswer = challengeAnswers.calculation[idx];
+                const inputField = document.getElementById(`calc${idx}`);
+                const explanation = document.getElementById(`calcExplanation${idx}`);
+                
+                // Allow for small rounding errors (±2%)
+                const correctAnswer = parseFloat(q.answer);
+                const isCorrect = userAnswer !== null && 
+                                  Math.abs((userAnswer - correctAnswer) / correctAnswer) <= 0.02;
+                
+                // Mark correct or incorrect
+                if (inputField) {
+                    if (isCorrect) {
+                        inputField.classList.add('correct');
+                        inputField.classList.remove('incorrect');
+                        correctCount++;
+                    } else if (userAnswer !== null) {
+                        inputField.classList.add('incorrect');
+                        inputField.classList.remove('correct');
+                    }
+                }
+                
+                // Show explanation
+                if (explanation) {
+                    explanation.classList.add('active');
+                }
+            });
+            
+            // Calculate score (10 points per correct calculation)
+            const score = correctCount * 10;
+            
+            // Update feedback
+            const feedback = document.getElementById('challenge5Feedback');
+            if (feedback) {
+                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
+            }
+            
+            // If all correct, mark challenge as completed
+            if (correctCount === totalQuestions && !challengeStates[5]) {
+                markChallengeComplete(5, score);
+            }
+        }
+
+        function showQuizHints(challengeNum) {
+            const hint = document.getElementById(`challenge${challengeNum}Hint`);
+            
+            if (hint) {
+                // Build combined hints for all questions
+                let hintsHtml = '<div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hints:</div><div class="challenge-hint-content">';
+                
+                // Add hints for each question
+                questionBank.mcq.forEach((q, idx) => {
+                    if (q.hint) {
+                        hintsHtml += `<p><strong>Question ${idx+1}:</strong> ${q.hint}</p>`;
+                    }
+                });
+                
+                hintsHtml += '</div>';
+                
+                // Update hint content
+                hint.innerHTML = hintsHtml;
+                hint.classList.add('active');
+                increaseHintCount();
+            }
+        }
+
+        function showFillBlanksHint() {
+            const hint = document.getElementById('challenge2Hint');
+            
+            if (hint) {
+                // Build combined hints for all questions
+                let hintsHtml = '<div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hints:</div><div class="challenge-hint-content">';
+                
+                // Add hints for each question
+                questionBank.fillBlanks.forEach((q, idx) => {
+                    if (q.hint) {
+                        hintsHtml += `<p><strong>Question ${idx+1}:</strong> ${q.hint}</p>`;
+                    }
+                });
+                
+                hintsHtml += '</div>';
+                
+                // Update hint content
+                hint.innerHTML = hintsHtml;
+                hint.classList.add('active');
+                increaseHintCount();
+            }
+        }
+
+        function showMatchingHints() {
+            const hint = document.getElementById('challenge3Hint');
+            if (hint) {
+                // Matching hints are general, so we don't need to customize them per question
+                hint.classList.add('active');
+                increaseHintCount();
+            }
+        }
+
+        function showAdvancedHints() {
+            const hint = document.getElementById('challenge4Hint');
+            
+            if (hint) {
+                // Build combined hints for all questions
+                let hintsHtml = '<div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hints:</div><div class="challenge-hint-content">';
+                
+                // Add hints for each question
+                questionBank.advanced.forEach((q, idx) => {
+                    if (q.hint) {
+                        hintsHtml += `<p><strong>Question ${idx+1}:</strong> ${q.hint}</p>`;
+                    }
+                });
+                
+                hintsHtml += '</div>';
+                
+                // Update hint content
+                hint.innerHTML = hintsHtml;
+                hint.classList.add('active');
+                increaseHintCount();
+            }
+        }
+
+        function showCalculationHint() {
+            const hint = document.getElementById('challenge5Hint');
+            
+            if (hint) {
+                // Build combined hints for all questions
+                let hintsHtml = '<div class="challenge-hint-title"><i class="fas fa-lightbulb"></i> Hints:</div><div class="challenge-hint-content">';
+                
+                // Add hints for each question
+                questionBank.calculation.forEach((q, idx) => {
+                    if (q.hint) {
+                        hintsHtml += `<p><strong>Question ${idx+1}:</strong> ${q.hint}</p>`;
+                    }
+                });
+                
+                hintsHtml += '</div>';
+                
+                // Update hint content
+                hint.innerHTML = hintsHtml;
+                hint.classList.add('active');
+                increaseHintCount();
+            }
+        }
+
+        function increaseHintCount() {
+            hintsUsed++;
+            updateChallengeStats();
+        }
+
+        function markChallengeComplete(challengeNum, points) {
+            // Mark as completed
+            challengeStates[challengeNum] = true;
+            
+            // Update UI
+            const challengeSection = document.getElementById(`challenge${challengeNum}`);
+            if (challengeSection) {
+                challengeSection.classList.add('completed');
+            }
+            
+            // Update score
+            totalScore += points;
+            challengesCompleted++;
+            
+            // Update stats display
+            updateChallengeStats();
+        }
+
+        function updateChallengeStats() {
+            // Update UI elements
+            document.getElementById('challengesCompleted').textContent = challengesCompleted;
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('hintsUsed').textContent = hintsUsed;
+            
+            // Update progress bar
+            const totalChallenges = Object.keys(challengeStates).length;
+            const progressPercent = (challengesCompleted / totalChallenges) * 100;
+            document.getElementById('challengeProgressBar').style.width = `${progressPercent}%`;
+        }
+
+        function resetChallenge(challengeNum) {
+            // If already completed, don't allow reset
+            if (challengeStates[challengeNum] && !confirm('This challenge is already completed. Reset anyway?')) {
+                return;
+            }
+            
+            // Reset the challenge state
+            if (challengeStates[challengeNum]) {
+                challengeStates[challengeNum] = false;
+                challengesCompleted--;
+                updateChallengeStats();
+            }
+            
+            // Reset UI based on challenge type
+            switch (challengeNum) {
+                case 1: // MCQ
+                    challengeAnswers.mcq = Array(questionBank.mcq.length).fill(null);
+                    document.querySelectorAll('#mcqContent .quiz-option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect');
+                    });
+                    document.querySelectorAll('#mcqContent .explanation-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                    break;
+                    
+                case 2: // Fill in blanks
+                    challengeAnswers.fillBlanks = Array(questionBank.fillBlanks.length).fill(null).map(() => []);
+                    document.querySelectorAll('.fill-blank-input').forEach(input => {
+                        input.value = '';
+                        input.classList.remove('correct', 'incorrect');
+                    });
+                    document.querySelectorAll('#fillBlanksContent .explanation-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                    break;
+                    
+                case 3: // Matching
+                    challengeAnswers.matching = {};
+                    // Remove all connection lines
+                    document.querySelectorAll('.connection-line').forEach(line => line.remove());
+                    // Reset all items
+                    document.querySelectorAll('.matching-item').forEach(item => {
+                        item.classList.remove('selected', 'matched', 'correct-match', 'incorrect-match');
+                    });
+                    // Reset tracking variables
+                    connectionLines = {};
+                    selectedMatchingItems = [];
+                    break;
+                    
+                case 4: // Advanced
+                    challengeAnswers.advanced = Array(questionBank.advanced.length).fill(null);
+                    document.querySelectorAll('#advancedContent .quiz-option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect');
+                    });
+                    document.querySelectorAll('#advancedContent .explanation-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                    break;
+                    
+                case 5: // Calculation
+                    challengeAnswers.calculation = Array(questionBank.calculation.length).fill(null);
+                    document.querySelectorAll('#calculationContent input').forEach(input => {
+                        input.value = '';
+                        input.classList.remove('correct', 'incorrect');
+                    });
+                    document.querySelectorAll('#calculationContent .explanation-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                    break;
+            }
+            
+            // Clear feedback
+            const feedback = document.getElementById(`challenge${challengeNum}Feedback`);
+            if (feedback) {
+                feedback.innerHTML = '';
+                feedback.className = 'challenge-feedback';
+            }
+            
+            // Hide hint
+            const hint = document.getElementById(`challenge${challengeNum}Hint`);
+            if (hint) {
+                hint.classList.remove('active');
+            }
+            
+            // Remove completed class from section
+            const section = document.getElementById(`challenge${challengeNum}`);
+            if (section) {
+                section.classList.remove('completed');
+            }
+        }
+
+        function resetAllChallenges() {
+            if (!confirm('Are you sure you want to reset all challenges? This will clear all your progress.')) {
+                return;
+            }
+            
+            // Reset all challenge states
+            Object.keys(challengeStates).forEach(challengeNum => {
+                resetChallenge(parseInt(challengeNum));
+            });
+            
+            // Reset global stats
+            totalScore = 0;
+            challengesCompleted = 0;
+            hintsUsed = 0;
+            
+            // Update stats display
+            updateChallengeStats();
+        }
+    </script>
+
+    <!-- Floating Buttons -->
+    <div class="floating-button tour" onclick="startGuidedTour()">
+        <i class="fas fa-route"></i>
+    </div>
+
+    <div class="floating-button help" onclick="toggleHelp()">
+        <i class="fas fa-question"></i>
+    </div>
+
+    <!-- Tour Elements -->
+    <div class="tour-overlay" id="tourOverlay">
+        <div class="tour-spotlight" id="tourSpotlight"></div>
+        <div class="tour-spotlight-secondary" id="tourSpotlightSecondary" style="display: none;"></div>
+    </div>
+
+    <div class="tour-popup" id="tourPopup">
+        <div class="tour-header">
+            <div class="tour-step-number" id="tourStepNumber">1</div>
+            <h3 class="tour-title" id="tourTitle">Welcome to Optoelectronics Lab</h3>
+        </div>
+        <div class="tour-progress">
+            <div class="tour-progress-bar" id="tourProgressBar" style="width: 0%"></div>
+        </div>
+        <div class="tour-content" id="tourContent">
+            Welcome to the interactive Optoelectronics Virtual Lab! This guided tour will help you understand how semiconductor devices convert between light and electricity.
+        </div>
+        <div id="tourChallenge"></div>
+        <div class="tour-controls">
+            <button class="tour-btn tour-btn-secondary" id="prevButton" onclick="prevTourStep()" disabled>Previous</button>
+            <div>
+                <button class="tour-btn tour-btn-secondary" onclick="skipTour()">Skip Walkthrough</button>
+                <button class="tour-btn tour-btn-primary" id="nextButton" onclick="nextTourStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Panel -->
+    <div class="floating-panel" id="helpPanel">
+        <div class="floating-panel-header">
+            <h3 class="panel-title">Help & Information</h3>
+            <div class="floating-panel-close" onclick="toggleHelp()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="floating-panel-content">
+            <h4 style="margin-bottom: 10px; color: #4b5563;">About this Simulation</h4>
+            <p style="line-height: 1.5; margin-bottom: 15px;">
+                This interactive simulation allows you to explore the behavior of three important optoelectronic devices:
+            </p>
+            <ul style="padding-left: 20px; margin-bottom: 15px;">
+                <li style="margin-bottom: 8px;"><strong>Photodiode</strong>: Converts light into electrical current</li>
+                <li style="margin-bottom: 8px;"><strong>LED</strong>: Converts electrical current into light</li>
+                <li style="margin-bottom: 8px;"><strong>Solar Cell</strong>: Converts sunlight into electrical power</li>
+            </ul>
+            <p style="line-height: 1.5; margin-bottom: 15px;">
+                Use the sliders to adjust parameters and observe how they affect device operation in real-time.
+            </p>
+            
+            <h4 style="margin: 20px 0 10px; color: #4b5563;">Controls Guide</h4>
+            <p style="line-height: 1.5;">
+                <strong>Bias Voltage</strong>: Apply voltage across the device<br>
+                <strong>Light Intensity</strong>: Change incident light power<br>
+                <strong>Temperature</strong>: Adjust operating temperature<br>
+                <strong>Load Resistance</strong>: (Solar cell) Change external load
+            </p>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                <button class="tour-btn tour-btn-primary" style="width: 100%;" onclick="startGuidedTour()">
+                    Start Guided Tour
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
