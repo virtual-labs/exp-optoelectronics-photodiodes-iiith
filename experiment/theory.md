@@ -134,8 +134,6 @@ $$
     - **CMOS:** Uses per-pixel amplification.
 - **Laser Diode:** Uses **double heterostructures** to confine carriers and photons, achieving **stimulated emission** and **coherent light output**.
 
-> *[Insert schematic diagrams for avalanche photodiode, CCD pixel, and laser diode band diagram]*
-
 ---
 
 ## **Summary of Key Equations**
