@@ -1,9 +1,4 @@
 
-# **Optoelectronics: Photodiodes, LEDs, and Solar Cells**
-
----
-
-## **Topic Description**
 
 Optoelectronic devices exploit the interaction between **photons** and **charge carriers** in semiconductors to either:
 
@@ -24,8 +19,6 @@ Specialized variants include:
 
 These extend optoelectronic principles to **high-sensitivity detection**, **imaging**, and **coherent light generation**.
 
-> *[Insert schematic diagram comparing photodiode, LED, and solar cell structures here]*
-
 ---
 
 ## **Photon–Carrier Interactions**
@@ -36,7 +29,7 @@ The fundamental processes in optoelectronic devices involve:
 2. **Carrier Generation & Separation** → In the depletion region, the built-in **electric field** sweeps carriers toward opposite terminals.
 3. **Radiative Recombination** → In **direct bandgap semiconductors**, electron–hole recombination releases a photon.
 
-> *[Insert energy band diagram showing absorption in photodiode and emission in LED]*
+<p><img src="images/Pn.png" ></p> 
 
 ---
 
@@ -65,9 +58,7 @@ $$
 - \( h\nu \) → Photon energy  
 
 For reverse bias \( V < 0 \), \( I_{\text{ph}} \) dominates.
-
-> *[Insert I–V characteristic of photodiode under dark and illuminated conditions]*
-
+<p><img src="images/Dark.png" ></p> 
 ---
 
 ## **LED Operation**
@@ -92,7 +83,7 @@ $$
 
 Where \( \eta_{\text{ext}} \) is the **external quantum efficiency**, accounting for optical extraction losses.
 
-> *[Insert graph of emitted optical power vs. forward current for an LED]*
+<p><img src="images/led.png" ></p> 
 
 ---
 
@@ -131,7 +122,7 @@ $$
 \eta = \frac{V_{\text{oc}} I_{\text{sc}} FF}{P_{\text{in}}}
 $$
 
-> *[Insert I–V characteristic of solar cell under illumination, marking \( I_{\text{sc}} \), \( V_{\text{oc}} \), and \( P_{\text{mp}} \)]*
+<p><img src="images/solar.png" ></p> 
 
 ---
 
@@ -167,10 +158,6 @@ $$
 \eta = \frac{V_{\text{oc}} I_{\text{sc}} FF}{P_{\text{in}}}
 $$
 
----
 
-## **Suggested References**
 
-1. D. A. Neamen — *Semiconductor Physics and Devices*  
-2. J. Singh — *Optoelectronics: An Introduction to Materials and Devices*  
-3. S. M. Sze & K. Ng — *Physics of Semiconductor Devices*
+
