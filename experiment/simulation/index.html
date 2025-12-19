@@ -640,14 +640,34 @@
 
         .quiz-option.correct {
             border-color: #10b981;
-            background: #f0fdf4;
+            border-width: 3px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             color: #065f46;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+        
+        .quiz-option.correct::before {
+            content: '✓ ';
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         .quiz-option.incorrect {
             border-color: #ef4444;
-            background: #fef2f2;
+            border-width: 3px;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
             color: #991b1b;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+        
+        .quiz-option.incorrect::before {
+            content: '✗ ';
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         .fill-blank-container {
@@ -683,14 +703,20 @@
 
         .fill-blank-input.correct {
             border-color: #10b981;
-            background: #f0fdf4;
+            border-width: 3px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             color: #065f46;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
         }
 
         .fill-blank-input.incorrect {
             border-color: #ef4444;
-            background: #fef2f2;
+            border-width: 3px;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
             color: #991b1b;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
         }
 
         .matching-container {
@@ -752,14 +778,27 @@
             justify-content: center;
         }
         
-        .connection-line {
+        .matching-connections svg {
             position: absolute;
-            background: #6366f1;
-            height: 3px;
-            border-radius: 2px;
-            opacity: 0.8;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
             z-index: 1;
-            transform-origin: left;
+        }
+        
+        .connection-line {
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 3;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .connection-line:hover {
+            stroke-width: 4;
+            opacity: 1;
         }
         
         .challenge-stats {
@@ -841,25 +880,48 @@
         }
 
         .challenge-feedback {
-            margin-top: 15px;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-weight: 500;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.7;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .challenge-feedback.success {
-            background: #f0fdf4;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             color: #065f46;
-            border: 1px solid #10b981;
+            border: 2px solid #10b981;
+            border-left: 6px solid #10b981;
             display: block;
         }
 
         .challenge-feedback.error {
-            background: #fef2f2;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
             color: #991b1b;
-            border: 1px solid #ef4444;
+            border: 2px solid #ef4444;
+            border-left: 6px solid #ef4444;
             display: block;
+        }
+        
+        .challenge-feedback ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .challenge-feedback li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .challenge-feedback li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #059669;
+            font-weight: bold;
         }
 
         .challenge-hint {
@@ -884,17 +946,37 @@
         }
 
         .explanation-panel {
-            background: #f0f9ff;
-            border: 1px solid #0284c7;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0284c7;
+            border-left: 5px solid #0284c7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
             display: none;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
         }
 
         .explanation-panel.active {
             display: block;
-            animation: slideDown 0.3s ease-out;
+            animation: slideDown 0.4s ease-out;
+        }
+        
+        .explanation-panel strong {
+            color: #0369a1;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .explanation-panel strong::before {
+            content: '💡 ';
+            font-size: 1.2rem;
+        }
+        
+        .explanation-content {
+            color: #1e3a8a;
+            line-height: 1.7;
+            font-size: 0.95rem;
         }
 
         @keyframes slideDown {
@@ -2532,7 +2614,36 @@
             });
 
             const plotDiv = currentPlotDiv || 'ivPlot';
-            Plotly.react(plotDiv, traces);
+            
+            // Use Plotly.react to update existing plot, or Plotly.newPlot if needed
+            const plotElement = document.getElementById(plotDiv);
+            if (plotElement && plotElement.data) {
+                Plotly.react(plotDiv, traces, {
+                    title: {
+                        text: `${currentDevice.toUpperCase()} I-V Characteristics`,
+                        font: { size: 14 }
+                    },
+                    margin: { t: 30, r: 40, l: 60, b: 40 },
+                    xaxis: { title: 'Voltage (V)', titlefont: { size: 12 } },
+                    yaxis: { title: 'Current (mA)', titlefont: { size: 12 } },
+                    plot_bgcolor: 'rgba(255, 255, 255, 0.7)',
+                    paper_bgcolor: 'transparent',
+                    legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, font: { size: 10 } }
+                }, { responsive: true, displayModeBar: false });
+            } else {
+                Plotly.newPlot(plotDiv, traces, {
+                    title: {
+                        text: `${currentDevice.toUpperCase()} I-V Characteristics`,
+                        font: { size: 14 }
+                    },
+                    margin: { t: 30, r: 40, l: 60, b: 40 },
+                    xaxis: { title: 'Voltage (V)', titlefont: { size: 12 } },
+                    yaxis: { title: 'Current (mA)', titlefont: { size: 12 } },
+                    plot_bgcolor: 'rgba(255, 255, 255, 0.7)',
+                    paper_bgcolor: 'transparent',
+                    legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, font: { size: 10 } }
+                }, { responsive: true, displayModeBar: false });
+            }
         }
 
         function calculateCurrentForVoltage(voltage, intensity = lightIntensity) {
@@ -2856,7 +2967,7 @@
                         title: "Solar Cell Parameters",
                         content: "Notice key parameters like open-circuit voltage (Voc), short-circuit current (Isc), and fill factor. These determine solar cell efficiency.",
                         target: ".experiment-content.active [id$='IvPlot']",
-                        position: "right"
+                        position: "center"
                     }
                 ]
             },
@@ -3485,7 +3596,11 @@
                             `).join('')}
                         </div>
                         <div class="explanation-panel" id="mcqExplanation${idx}">
-                            <strong>Explanation:</strong> ${q.explanation}
+                            <strong>Explanation:</strong>
+                            <div class="explanation-content">
+                                ${q.explanation}
+                                ${q.hint ? `<br><br><em style="color: #0369a1;">💭 Hint: ${q.hint}</em>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -3512,7 +3627,12 @@
                         <h4>Question ${idx + 1}</h4>
                         <div class="fill-blank-text">${text}</div>
                         <div class="explanation-panel" id="fillBlankExplanation${idx}">
-                            <strong>Explanation:</strong> ${q.explanation}
+                            <strong>Explanation:</strong>
+                            <div class="explanation-content">
+                                ${q.explanation}
+                                ${q.hint ? `<br><br><em style="color: #0369a1;">💭 Hint: ${q.hint}</em>` : ''}
+                                <br><br><strong style="color: #059669; font-size: 0.95rem;">✓ Correct Answers: ${q.blanks.join(', ')}</strong>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -3577,7 +3697,11 @@
                             `).join('')}
                         </div>
                         <div class="explanation-panel" id="advancedExplanation${idx}">
-                            <strong>Explanation:</strong> ${q.explanation}
+                            <strong>Explanation:</strong>
+                            <div class="explanation-content">
+                                ${q.explanation}
+                                ${q.hint ? `<br><br><em style="color: #0369a1;">💭 Hint: ${q.hint}</em>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -3599,7 +3723,12 @@
                             <span style="font-weight: 600;">${q.unit}</span>
                         </div>
                         <div class="explanation-panel" id="calcExplanation${idx}">
-                            <strong>Explanation:</strong> ${q.explanation}
+                            <strong>Explanation:</strong>
+                            <div class="explanation-content">
+                                ${q.explanation}
+                                <br><br><strong style="color: #059669; font-size: 1rem;">✓ Correct Answer: ${q.answer} ${q.unit}</strong>
+                                ${q.hint ? `<br><br><em style="color: #0369a1;">💭 Hint: ${q.hint}</em>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -3732,23 +3861,39 @@
             const endX = rightRect.left - containerRect.left;
             const endY = rightRect.top + rightRect.height/2 - containerRect.top;
             
-            // Create the line
-            const line = document.createElement('div');
-            line.id = `connection-${connectionId}`;
-            line.className = 'connection-line';
+            // Get or create SVG element
+            let svg = connectionsContainer.querySelector('svg');
+            if (!svg) {
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                connectionsContainer.appendChild(svg);
+            }
             
-            // Calculate line length and angle
-            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            // Create curved path using cubic Bezier curve
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.id = `connection-${connectionId}`;
+            path.classList.add('connection-line');
             
-            // Position and rotate the line
-            line.style.width = `${length}px`;
-            line.style.left = `${startX}px`;
-            line.style.top = `${startY}px`;
-            line.style.transform = `rotate(${angle}deg)`;
+            // Calculate control points for a nice curve
+            // Add some randomness and asymmetry for visual interest
+            const midX = (startX + endX) / 2;
+            const yDiff = endY - startY;
+            const curveStrength = 30 + Math.abs(yDiff) * 0.3; // Base curve plus variation based on vertical distance
             
-            // Add to container
-            connectionsContainer.appendChild(line);
+            // Add some vertical variation to make curves more interesting
+            const verticalOffset = (Math.sin(connectionId * 2.5) * 20); // Varying offset based on connection ID
+            
+            // Create asymmetric curve with two control points
+            const ctrl1X = startX + (midX - startX) * 0.6;
+            const ctrl1Y = startY + verticalOffset - curveStrength;
+            const ctrl2X = endX - (endX - midX) * 0.6;
+            const ctrl2Y = endY - verticalOffset + curveStrength;
+            
+            // Create the SVG path with cubic Bezier curve
+            const pathData = `M ${startX} ${startY} C ${ctrl1X} ${ctrl1Y}, ${ctrl2X} ${ctrl2Y}, ${endX} ${endY}`;
+            path.setAttribute('d', pathData);
+            
+            // Add to SVG
+            svg.appendChild(path);
         }
         
         function removePair(connectionId) {
@@ -3810,7 +3955,20 @@
             // Update feedback
             const feedback = document.getElementById('challenge1Feedback');
             if (feedback) {
-                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                const percentage = Math.round((correctCount / totalQuestions) * 100);
+                let message = `<strong>🎯 Results: ${correctCount}/${totalQuestions} correct (${percentage}%) - Score: ${score} points</strong><br><br>`;
+                
+                if (correctCount === totalQuestions) {
+                    message += '🎉 <strong>Perfect score!</strong> You have mastered the basics of optoelectronics! Review the explanations below to reinforce your understanding.';
+                } else if (percentage >= 80) {
+                    message += '👍 <strong>Great job!</strong> You have a strong grasp of the concepts. Review the explanations for the questions you missed to fill in any gaps.';
+                } else if (percentage >= 60) {
+                    message += '💪 <strong>Good effort!</strong> You understand many concepts. Carefully read the explanations below to strengthen your knowledge in areas where you struggled.';
+                } else {
+                    message += '📚 <strong>Keep learning!</strong> Review all the explanations carefully. Consider revisiting the simulation experiments to better understand the concepts before trying again.';
+                }
+                
+                feedback.innerHTML = message;
                 feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
             }
             
@@ -3859,7 +4017,18 @@
             // Update feedback
             const feedback = document.getElementById('challenge2Feedback');
             if (feedback) {
-                feedback.innerHTML = `You got ${correctCount} out of ${totalBlanks} blanks correct! Score: ${score} points`;
+                const percentage = Math.round((correctCount / totalBlanks) * 100);
+                let message = `<strong>🎯 Results: ${correctCount}/${totalBlanks} blanks correct (${percentage}%) - Score: ${score} points</strong><br><br>`;
+                
+                if (correctCount === totalBlanks) {
+                    message += '🎉 <strong>Excellent!</strong> You recalled all the key terms correctly! The explanations below provide additional context for each answer.';
+                } else if (percentage >= 70) {
+                    message += '👍 <strong>Well done!</strong> Most of your answers are correct. Check the explanations below to see the correct terms and understand why they fit.';
+                } else {
+                    message += '📚 <strong>Review needed!</strong> Study the correct answers and explanations below carefully. Pay attention to the terminology used in optoelectronics.';
+                }
+                
+                feedback.innerHTML = message;
                 feedback.className = 'challenge-feedback ' + (correctCount === totalBlanks ? 'success' : 'error');
             }
             
@@ -3900,7 +4069,25 @@
             // Update feedback
             const feedback = document.getElementById('challenge3Feedback');
             if (feedback) {
-                feedback.innerHTML = `You matched ${correctCount} out of ${totalPairs} pairs correctly! Score: ${score} points`;
+                const percentage = Math.round((correctCount / totalPairs) * 100);
+                let message = `<strong>🎯 Results: ${correctCount}/${totalPairs} pairs matched correctly (${percentage}%) - Score: ${score} points</strong><br><br>`;
+                
+                if (correctCount === totalPairs) {
+                    message += '🎊 <strong>Perfect matching!</strong> You correctly identified all the relationships between optoelectronic concepts and their properties!';
+                } else if (percentage >= 70) {
+                    message += '👍 <strong>Good work!</strong> Most of your matches are correct. Review the correct pairings shown above to understand the relationships better.';
+                } else {
+                    message += '📚 <strong>Keep trying!</strong> Understanding these relationships is key to mastering optoelectronics. Study the correct matches displayed above.';
+                }
+                
+                // Add correct answers display
+                message += '<br><br><strong style="color: #059669;">✓ Correct Matches:</strong><ul style="text-align: left; margin-top: 10px;">';
+                questionBank.matching.forEach((item, idx) => {
+                    message += `<li><strong>${item.left}</strong> ↔ ${item.right}</li>`;
+                });
+                message += '</ul>';
+                
+                feedback.innerHTML = message;
                 feedback.className = 'challenge-feedback ' + (correctCount === totalPairs ? 'success' : 'error');
             }
             
@@ -3947,7 +4134,18 @@
             // Update feedback
             const feedback = document.getElementById('challenge4Feedback');
             if (feedback) {
-                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                const percentage = Math.round((correctCount / totalQuestions) * 100);
+                let message = `<strong>🎯 Results: ${correctCount}/${totalQuestions} correct (${percentage}%) - Score: ${score} points</strong><br><br>`;
+                
+                if (correctCount === totalQuestions) {
+                    message += '🌟 <strong>Outstanding!</strong> You have mastered advanced optoelectronic concepts! The detailed explanations below provide even deeper insights.';
+                } else if (percentage >= 70) {
+                    message += '🔬 <strong>Strong performance!</strong> These are challenging questions. Review the comprehensive explanations below to understand the advanced concepts better.';
+                } else {
+                    message += '📖 <strong>These are advanced topics!</strong> Don\'t be discouraged. Read through all the detailed explanations to gain a deeper understanding of these complex concepts.';
+                }
+                
+                feedback.innerHTML = message;
                 feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
             }
             
@@ -3996,7 +4194,18 @@
             // Update feedback
             const feedback = document.getElementById('challenge5Feedback');
             if (feedback) {
-                feedback.innerHTML = `You got ${correctCount} out of ${totalQuestions} correct! Score: ${score} points`;
+                const percentage = Math.round((correctCount / totalQuestions) * 100);
+                let message = `<strong>🎯 Results: ${correctCount}/${totalQuestions} calculations correct (${percentage}%) - Score: ${score} points</strong><br><br>`;
+                
+                if (correctCount === totalQuestions) {
+                    message += '🧠 <strong>Brilliant!</strong> Your calculations are spot on! Review the solution steps below to see the methodology used.';
+                } else if (percentage >= 70) {
+                    message += '📈 <strong>Good math skills!</strong> Check the detailed solutions below to see where any errors occurred. Remember to use proper units and significant figures.';
+                } else {
+                    message += '📝 <strong>Practice makes perfect!</strong> Study the complete solutions below step-by-step. Make sure you understand the formulas and how to apply them correctly.';
+                }
+                
+                feedback.innerHTML = message;
                 feedback.className = 'challenge-feedback ' + (correctCount === totalQuestions ? 'success' : 'error');
             }
             
@@ -4180,8 +4389,14 @@
                     
                 case 3: // Matching
                     challengeAnswers.matching = {};
-                    // Remove all connection lines
-                    document.querySelectorAll('.connection-line').forEach(line => line.remove());
+                    // Remove all connection lines and SVG
+                    const connectionsContainer = document.getElementById('matchingConnections');
+                    if (connectionsContainer) {
+                        const svg = connectionsContainer.querySelector('svg');
+                        if (svg) {
+                            svg.remove();
+                        }
+                    }
                     // Reset all items
                     document.querySelectorAll('.matching-item').forEach(item => {
                         item.classList.remove('selected', 'matched', 'correct-match', 'incorrect-match');
