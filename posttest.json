@@ -1,0 +1,155 @@
+{"version": 2.0, "questions": [
+{
+"question": "1. What is the primary function of a solar cell?",
+"answers": {
+"a": "Convert electrical energy into light",
+"b": "Convert light energy into electrical energy",
+"c": "Store electrical energy",
+"d": "Amplify electrical signals"
+},
+"explanations": {
+"a": "Incorrect. That’s the function of LEDs.",
+"b": "Correct. Solar cells convert sunlight into electrical energy using the photovoltaic effect.",
+"c": "Incorrect. Solar cells generate power; they do not store it.",
+"d": "Incorrect. Amplification is unrelated to solar cells."
+},
+"correctAnswer": "b",
+"difficulty": "beginner"
+},
+{
+"question": "2. In an LED, which parameter directly determines the color of the emitted light?",
+"answers": {
+"a": "Forward current",
+"b": "Bandgap energy of the semiconductor",
+"c": "Applied voltage polarity",
+"d": "Recombination lifetime"
+},
+"explanations": {
+"a": "Incorrect. Forward current affects brightness, not color.",
+"b": "Correct. The emitted photon energy is determined by Eg, which sets the color.",
+"c": "Incorrect. Polarity only determines conduction direction.",
+"d": "Incorrect. Lifetime affects efficiency, not wavelength."
+},
+"correctAnswer": "b",
+"difficulty": "beginner"
+},
+{
+"question": "3. Which device operates in reverse bias and generates current due to incident photons?",
+"answers": {
+"a": "LED",
+"b": "Photodiode",
+"c": "Laser diode",
+"d": "Thyristor"
+},
+"explanations": {
+"a": "Incorrect. LEDs operate under forward bias for emission.",
+"b": "Correct. Photodiodes are reverse-biased and detect photons, producing photocurrent.",
+"c": "Incorrect. Laser diodes emit light, not detect it.",
+"d": "Incorrect. Thyristors are unrelated to optoelectronic detection."
+},
+"correctAnswer": "b",
+"difficulty": "beginner"
+},
+{
+"question": "4. A photodiode has Popt = 1.5 mW, η = 0.8, and hν = 2.5 × 10⁻¹⁹ J. Calculate Iph. Use q = 1.6 × 10⁻¹⁹ C.",
+"answers": {
+"a": "7.6 μA",
+"b": "4.8 μA",
+"c": "5.1 μA",
+"d": "9.6 μA"
+},
+"explanations": {
+"a": "Correct. Iph = qηPopt/hν = (1.6e-19 × 0.8 × 1.5e-3) / (2.5e-19) ≈ 7.6 μA.",
+"b": "Incorrect. Miscalculated numerator.",
+"c": "Incorrect. Lower than expected value.",
+"d": "Incorrect. Overestimation of photocurrent."
+},
+"correctAnswer": "a",
+"difficulty": "intermediate"
+},
+{
+"question": "5. In an LED, if Rnonrad >> Rrad, what happens to the external quantum efficiency?",
+"answers": {
+"a": "It approaches zero",
+"b": "It approaches unity",
+"c": "It becomes infinite",
+"d": "It remains constant"
+},
+"explanations": {
+"a": "Correct. ηint = Rrad / (Rrad + Rnonrad). If Rnonrad dominates, ηint ≈ 0.",
+"b": "Incorrect. Unity efficiency occurs only if Rnonrad ≈ 0.",
+"c": "Incorrect. Efficiency cannot be infinite.",
+"d": "Incorrect. Efficiency is affected by recombination dynamics."
+},
+"correctAnswer": "a",
+"difficulty": "intermediate"
+},
+{
+"question": "6. A solar cell delivers Voc = 0.55 V, Isc = 25 mA, FF = 0.78, and Pin = 60 mW. Calculate its efficiency.",
+"answers": {
+"a": "17.9%",
+"b": "20.1%",
+"c": "23.5%",
+"d": "28.4%"
+},
+"explanations": {
+"a": "Correct. η = (Voc × Isc × FF) / Pin = (0.55×0.025×0.78)/0.06 ≈ 17.9%.",
+"b": "Incorrect. Overestimated value.",
+"c": "Incorrect. Higher than the actual efficiency.",
+"d": "Incorrect. Far too high."
+},
+"correctAnswer": "a",
+"difficulty": "intermediate"
+},
+{
+"question": "7. A GaAs LED emits photons of λ = 850 nm. What is the approximate photon energy?",
+"answers": {
+"a": "1.46 eV",
+"b": "1.8 eV",
+"c": "1.2 eV",
+"d": "2.0 eV"
+},
+"explanations": {
+"a": "Correct. E = hc/(λq) ≈ (6.626e-34×3e8)/(850e-9×1.6e-19) ≈ 1.46 eV.",
+"b": "Incorrect. Overestimated E.",
+"c": "Incorrect. Lower than calculated value.",
+"d": "Incorrect. Too large for this wavelength."
+},
+"correctAnswer": "a",
+"difficulty": "advanced"
+},
+{
+"question": "8. A solar cell has Voc = 0.7 V, Isc = 40 mA, and FF = 0.72. If the input power is 120 mW, find the efficiency η.",
+"answers": {
+"a": "16.8%",
+"b": "18.7%",
+"c": "20.5%",
+"d": "22.1%"
+},
+"explanations": {
+"a": "Correct. η = (Voc × Isc × FF) / Pin = (0.7×0.04×0.72)/0.12 ≈ 16.8%.",
+"b": "Incorrect. Slight overestimation.",
+"c": "Incorrect. Too high.",
+"d": "Incorrect. Overestimated."
+},
+"correctAnswer": "a",
+"difficulty": "advanced"
+},
+{
+"question": "9. In a laser diode, threshold current Ith increases primarily due to:",
+"answers": {
+"a": "Reduced recombination rates",
+"b": "High cavity losses and poor confinement",
+"c": "Lower non-radiative recombination",
+"d": "Constant quantum efficiency"
+},
+"explanations": {
+"a": "Incorrect. Reduced recombination decreases threshold current, not increases it.",
+"b": "Correct. Greater optical losses require more carriers for population inversion, increasing Ith.",
+"c": "Incorrect. Lower non-radiative recombination improves efficiency, lowering Ith.",
+"d": "Incorrect. Quantum efficiency doesn't stay constant under loss variations."
+},
+"correctAnswer": "b",
+"difficulty": "advanced"
+}
+]}
