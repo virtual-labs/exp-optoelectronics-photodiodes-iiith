@@ -1,0 +1,155 @@
+{"version": 2.0, "questions": [
+{
+"question": "1. In a photodiode, which of the following conditions must be satisfied for photon absorption to occur?",
+"answers": {
+"a": "hν < Eg",
+"b": "hν = 0",
+"c": "hν ≥ Eg",
+"d": "hν << Eg"
+},
+"explanations": {
+"a": "Incorrect. Photons with energy less than the bandgap cannot excite electrons.",
+"b": "Incorrect. Zero photon energy implies no excitation.",
+"c": "Correct. For photon absorption, the energy must be greater than or equal to the bandgap energy.",
+"d": "Incorrect. If energy is much less than Eg, no carriers are generated."
+},
+"correctAnswer": "c",
+"difficulty": "beginner"
+},
+{
+"question": "2. What is the main purpose of reverse biasing a photodiode?",
+"answers": {
+"a": "To increase dark current",
+"b": "To widen the depletion region and improve carrier collection",
+"c": "To generate more photons",
+"d": "To emit light"
+},
+"explanations": {
+"a": "Incorrect. Reverse bias doesn't aim to increase dark current.",
+"b": "Correct. Reverse bias widens the depletion region, enhancing carrier separation and photocurrent.",
+"c": "Incorrect. Photodiodes detect photons; they do not generate them.",
+"d": "Incorrect. Light emission is related to LEDs, not photodiodes."
+},
+"correctAnswer": "b",
+"difficulty": "beginner"
+},
+{
+"question": "3. In an LED, radiative recombination occurs when:",
+"answers": {
+"a": "Electrons recombine with holes releasing phonons",
+"b": "Electrons recombine with holes emitting photons",
+"c": "Photons get absorbed by the depletion layer",
+"d": "Carriers drift due to an external field only"
+},
+"explanations": {
+"a": "Incorrect. Phonon emission occurs in non-radiative recombination.",
+"b": "Correct. In LEDs, photon emission results from radiative recombination.",
+"c": "Incorrect. Photon absorption occurs in photodiodes, not LEDs.",
+"d": "Incorrect. Drift is involved but not responsible for light generation."
+},
+"correctAnswer": "b",
+"difficulty": "beginner"
+},
+{
+"question": "4. If the quantum efficiency η of a photodiode is 0.6, Popt = 2 mW, and photon energy hν = 3.2 × 10⁻¹⁹ J, calculate the photocurrent Iph. Use q = 1.6 × 10⁻¹⁹ C.",
+"answers": {
+"a": "6.0 μA",
+"b": "5.8 μA",
+"c": "7.5 μA",
+"d": "10.0 μA"
+},
+"explanations": {
+"a": "Incorrect. Use Iph = qηPopt/hν correctly.",
+"b": "Correct. Substituting: Iph = (1.6e-19 × 0.6 × 2e-3) / (3.2e-19) ≈ 5.8 μA.",
+"c": "Incorrect. Calculation mistake.",
+"d": "Incorrect. Overestimation of photocurrent."
+},
+"correctAnswer": "b",
+"difficulty": "intermediate"
+},
+{
+"question": "5. For an LED with internal quantum efficiency ηint = 0.7, Rrad = 7×10²³ s⁻¹, what is Rnonrad?",
+"answers": {
+"a": "3×10²³ s⁻¹",
+"b": "1×10²³ s⁻¹",
+"c": "2×10²³ s⁻¹",
+"d": "5×10²³ s⁻¹"
+},
+"explanations": {
+"a": "Incorrect. ηint = Rrad / (Rrad + Rnonrad). Solve carefully.",
+"b": "Correct. Rearranging: Rnonrad = Rrad(1 - ηint)/ηint = 7e23(1-0.7)/0.7 ≈ 1×10²³ s⁻¹.",
+"c": "Incorrect. Overestimated.",
+"d": "Incorrect. Mismatch in substitution."
+},
+"correctAnswer": "b",
+"difficulty": "intermediate"
+},
+{
+"question": "6. In a solar cell, if Voc = 0.6 V, Isc = 30 mA, FF = 0.8, and Pin = 50 mW, calculate efficiency η.",
+"answers": {
+"a": "28.8%",
+"b": "24.0%",
+"c": "36.5%",
+"d": "19.2%"
+},
+"explanations": {
+"a": "Correct. η = (Voc × Isc × FF) / Pin = (0.6×0.03×0.8)/0.05 ≈ 0.288 = 28.8%.",
+"b": "Incorrect. Check formula again.",
+"c": "Incorrect. Overestimation of η.",
+"d": "Incorrect. Underestimation of η."
+},
+"correctAnswer": "a",
+"difficulty": "intermediate"
+},
+{
+"question": "7. A silicon photodiode operates at λ = 900 nm. Find the minimum bandgap Eg required for photon absorption. (Use h = 6.626×10⁻³⁴ J·s, c = 3×10⁸ m/s, q = 1.6×10⁻¹⁹ C.)",
+"answers": {
+"a": "1.38 eV",
+"b": "1.55 eV",
+"c": "1.2 eV",
+"d": "2.0 eV"
+},
+"explanations": {
+"a": "Correct. Eg ≈ hc/(λq) ≈ (6.626e-34×3e8)/(900e-9×1.6e-19) ≈ 1.38 eV.",
+"b": "Incorrect. Overestimated Eg.",
+"c": "Incorrect. Slight underestimation.",
+"d": "Incorrect. Too large for this λ."
+},
+"correctAnswer": "a",
+"difficulty": "advanced"
+},
+{
+"question": "8. A solar cell has Isc = 40 mA, Voc = 0.65 V, and FF = 0.75. If its efficiency η = 30%, calculate the input power Pin.",
+"answers": {
+"a": "65 mW",
+"b": "80 mW",
+"c": "85 mW",
+"d": "100 mW"
+},
+"explanations": {
+"a": "Correct. Pin = (Voc × Isc × FF) / η = (0.65×0.04×0.75)/0.30 ≈ 65 mW.",
+"b": "Incorrect. Miscalculation.",
+"c": "Incorrect. Higher than actual.",
+"d": "Incorrect. Too large."
+},
+"correctAnswer": "a",
+"difficulty": "advanced"
+},
+{
+"question": "9. In a laser diode, what condition must be satisfied for stimulated emission to dominate?",
+"answers": {
+"a": "Carrier density < transparency threshold",
+"b": "Population inversion achieved",
+"c": "Bandgap energy must exceed photon energy",
+"d": "Quantum efficiency = 0"
+},
+"explanations": {
+"a": "Incorrect. Below threshold, no lasing occurs.",
+"b": "Correct. Stimulated emission requires population inversion (more electrons in the excited state than the ground state).",
+"c": "Incorrect. Photon energy must be ≤ bandgap for emission.",
+"d": "Incorrect. Zero quantum efficiency means no emission at all."
+},
+"correctAnswer": "b",
+"difficulty": "advanced"
+}
+]}
